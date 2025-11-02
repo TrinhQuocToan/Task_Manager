@@ -1,0 +1,68 @@
+<div class="auth-wrapper">
+    <div class="row w-100 mx-0">
+        <div class="col-md-6 welcome-section">
+            <h1 class="welcome-text">
+                Bắt đầu hành trình mới!
+                <span>Cùng xây dựng kế hoạch tài chính vững chắc</span>
+            </h1>
+        </div>
+        
+        <div class="col-md-6 form-section">
+            <div class="login-form">
+                <h2 class="mb-4">Đăng ký</h2>
+                <p class="text-muted mb-4">Tạo tài khoản để bắt đầu quản lý chi tiêu của bạn.</p>
+
+                {{#if messages.error}}
+                <div class="alert alert-danger">
+                    {{messages.error}}
+                </div>
+                {{/if}}
+
+                <form action="/auth/register" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="far fa-user me-2"></i>Tên người dùng
+                        </label>
+                        <input type="text" class="form-control" name="username" placeholder="Tên người dùng" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="far fa-envelope me-2"></i>Email
+                        </label>
+                        <input type="email" class="form-control" name="email" placeholder="Email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-lock me-2"></i>Mật khẩu
+                        </label>
+                        <input type="password" class="form-control" name="password" placeholder="Mật khẩu" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-lock me-2"></i>Xác nhận mật khẩu
+                        </label>
+                        <input type="password" class="form-control" name="confirmPassword" placeholder="Xác nhận mật khẩu" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mb-3">Đăng ký</button>
+
+                    <a href="/auth/facebook" class="btn btn-facebook w-100 mb-3">
+                        <i class="fab fa-facebook-f me-2"></i>Đăng ký với Facebook
+                    </a>
+
+                    <a href="/auth/google" class="btn btn-google w-100">
+                        <i class="fab fa-google me-2"></i>Đăng ký với Google
+                    </a>
+
+                    <div class="mt-4 text-center">
+                        <span class="me-2">Đã có tài khoản?</span>
+                        <a href="/auth/login" class="text-primary">Đăng nhập ngay</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

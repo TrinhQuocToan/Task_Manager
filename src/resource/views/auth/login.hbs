@@ -1,0 +1,66 @@
+<div class="auth-wrapper">
+    <div class="row w-100 mx-0">
+        <div class="col-md-6 welcome-section">
+            <h1 class="welcome-text">
+                Chào mừng quay trở lại!
+                <span>Hãy quản lý tài chính của bạn một cách thông minh</span>
+            </h1>
+        </div>
+        
+        <div class="col-md-6 form-section">
+            <div class="login-form">
+                <h2 class="mb-4">Đăng nhập</h2>
+                <p class="text-muted mb-4">Đăng nhập vào tài khoản của bạn để tiếp tục sử dụng các tính năng mới.</p>
+
+                {{#if success}}
+                <div class="alert alert-success alert-dismissible fade show">
+                    <i class="fas fa-check-circle me-2"></i>{{success}}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {{/if}}
+                
+                {{#if error}}
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-circle me-2"></i>{{error}}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {{/if}}
+
+                <!-- Debug info - Xóa sau khi debug xong -->
+                <div style="display: none;">
+                    <pre>Success: {{json success}}</pre>
+                    <pre>Error: {{json error}}</pre>
+                </div>
+
+                <form action="/auth/login" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="far fa-envelope me-2"></i>Email
+                        </label>
+                        <input type="email" class="form-control" name="email" value="{{email}}" placeholder="Email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-lock me-2"></i>Mật khẩu
+                        </label>
+                        <input type="password" class="form-control" name="password" placeholder="Mật khẩu" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mb-3">Đăng nhập</button>
+
+                    <a href="/auth/google" class="btn btn-google w-100">
+                        <i class="fab fa-google me-2"></i>Đăng nhập với Google
+                    </a>
+
+                    <div class="mt-4 text-center">
+                        <span class="me-2">Bạn chưa có tài khoản?</span>
+                        <a href="/auth/register" class="text-primary">Tạo Tài Khoản Ngay</a>
+                        <span class="mx-2">·</span>
+                        <a href="/auth/forgot-password" class="text-primary">Quên mật khẩu?</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

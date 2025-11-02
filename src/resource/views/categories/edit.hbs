@@ -1,0 +1,53 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Chỉnh sửa danh mục</h4>
+                </div>
+                <div class="card-body">
+                    <form action="/categories/{{category._id}}?_method=PUT" method="POST">
+                        <input type="hidden" name="_method" value="PUT">
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Tên danh mục</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{category.name}}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Loại danh mục</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="type" id="expense" value="expense" {{#if (eq category.type 'expense')}}checked{{/if}}>
+                                <label class="btn btn-outline-danger" for="expense">Chi tiêu</label>
+                                <input type="radio" class="btn-check" name="type" id="income" value="income" {{#if (eq category.type 'income')}}checked{{/if}}>
+                                <label class="btn btn-outline-success" for="income">Thu nhập</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="icon" class="form-label">Icon</label>
+                            <select class="form-select" id="icon" name="icon">
+                                <option value="restaurant" {{#if (eq category.icon 'restaurant')}}selected{{/if}}>🍽️ Ăn uống</option>
+                                <option value="directions_car" {{#if (eq category.icon 'directions_car')}}selected{{/if}}>🚗 Di chuyển</option>
+                                <option value="shopping_cart" {{#if (eq category.icon 'shopping_cart')}}selected{{/if}}>🛒 Mua sắm</option>
+                                <option value="receipt" {{#if (eq category.icon 'receipt')}}selected{{/if}}>📄 Hóa đơn</option>
+                                <option value="sports_esports" {{#if (eq category.icon 'sports_esports')}}selected{{/if}}>🎮 Giải trí</option>
+                                <option value="favorite" {{#if (eq category.icon 'favorite')}}selected{{/if}}>❤️ Sức khỏe</option>
+                                <option value="school" {{#if (eq category.icon 'school')}}selected{{/if}}>🎓 Giáo dục</option>
+                                <option value="payments" {{#if (eq category.icon 'payments')}}selected{{/if}}>💰 Lương</option>
+                                <option value="card_giftcard" {{#if (eq category.icon 'card_giftcard')}}selected{{/if}}>🎁 Thưởng</option>
+                                <option value="trending_up" {{#if (eq category.icon 'trending_up')}}selected{{/if}}>📈 Đầu tư</option>
+                                <option value="more_horiz" {{#if (eq category.icon 'more_horiz')}}selected{{/if}}>⋯ Khác</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="/categories" class="btn btn-secondary">Hủy</a>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

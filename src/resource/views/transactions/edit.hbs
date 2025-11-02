@@ -1,0 +1,139 @@
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Chỉnh Sửa Giao Dịch</h4>
+                    <a href="/transactions" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form action="/transactions/{{transaction._id}}?_method=PUT" method="POST">
+                        <input type="hidden" name="_method" value="PUT">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Loại giao dịch</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="type" id="typeIncome" value="income" 
+                                           {{#if (eq transaction.type "income")}}checked{{/if}}>
+                                    <label class="form-check-label" for="typeIncome">Thu nhập</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="type" id="typeExpense" value="expense"
+                                           {{#if (eq transaction.type "expense")}}checked{{/if}}>
+                                    <label class="form-check-label" for="typeExpense">Chi tiêu</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{!-- <div class="mb-3">
+                            <label class="form-label">Danh mục hiện tại</label>
+                            <input type="text" class="form-control" value="{{transaction.categoryId.name}}" readonly>
+                        </div> --}}
+
+                        <div class="mb-3">
+                            <label class="form-label" > Danh Mục</label>
+                            <select class="form-select" name="categoryId" id="categorySelect" required>
+                                <option value="">{{transaction.categoryId.name}}</option>
+                                <optgroup label="Chi tiêu">
+                                    {{#each expenseCategories}}
+                                        <option value="{{this._id}}" data-type="expense" 
+                                            {{#if (eq ../transaction.categoryId._id this._id)}}selected{{/if}}>
+                                            {{this.name}}
+                                        </option>
+                                    {{/each}}
+                                </optgroup>
+                                <optgroup label="Thu nhập">
+                                    {{#each incomeCategories}}
+                                        <option value="{{this._id}}" data-type="income"
+                                            {{#if (eq ../transaction.categoryId._id this._id)}}selected{{/if}}>
+                                            {{this.name}}
+                                        </option>
+                                    {{/each}}
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Số tiền</label>
+                            <div class="input-group">
+                                <input type="text" 
+                                       class="form-control" 
+                                       name="amount" 
+                                       required 
+                                       pattern="[0-9]*"
+                                       inputmode="numeric"
+                                       value="{{transaction.amount}}"
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                <span class="input-group-text">VND</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ngày</label>
+                            <input type="date" class="form-control" name="date" 
+                                   value="{{transaction.formattedDate}}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ghi chú</label>
+                            <textarea class="form-control" name="note" rows="3">{{transaction.note}}</textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="/transactions" class="btn btn-secondary">Hủy</a>
+                            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeIncome = document.getElementById('typeIncome');
+    const typeExpense = document.getElementById('typeExpense');
+    const categorySelect = document.getElementById('categorySelect');
+    
+    // Log để debug
+    console.log('Initial transaction type:', '{{transaction.type}}');
+    console.log('Initial category:', {
+        id: '{{transaction.categoryId._id}}',
+        name: '{{transaction.categoryId.name}}',
+        type: '{{transaction.categoryId.type}}'
+    });
+    
+    function updateCategoryOptions() {
+        const selectedType = typeIncome.checked ? 'income' : 'expense';
+        const options = categorySelect.querySelectorAll('option[data-type]');
+        const optgroups = categorySelect.querySelectorAll('optgroup');
+        
+        options.forEach(option => {
+            const optionType = option.dataset.type;
+            option.style.display = optionType === selectedType ? '' : 'none';
+        });
+
+        optgroups.forEach(optgroup => {
+            const visibleOptions = optgroup.querySelectorAll('option[style=""][data-type="' + selectedType + '"]');
+            optgroup.style.display = visibleOptions.length > 0 ? '' : 'none';
+        });
+
+        // Reset selection nếu category không phù hợp với type
+        const selectedOption = categorySelect.querySelector('option:checked');
+        if (selectedOption && selectedOption.dataset.type !== selectedType) {
+            categorySelect.value = '';
+        }
+    }
+
+    // Khởi tạo ban đầu
+    updateCategoryOptions();
+
+    // Thêm event listeners
+    typeIncome.addEventListener('change', updateCategoryOptions);
+    typeExpense.addEventListener('change', updateCategoryOptions);
+});
+</script>

@@ -1,0 +1,120 @@
+<div class="container mt-4">
+    <form method="post" action="">
+        <div class="mb-3">
+            <label for="keyWords" class="form-label">Nhập từ khóa</label>
+            <input type="text" name="q" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+<div class="search-results mt-4">
+    {{#if searchQuery}}
+    <div class="search-header mb-4">
+        <h4>Kết quả tìm kiếm cho "{{searchQuery}}"</h4>
+        {{#if transactions.length}}
+            <p class="text-muted">Tìm thấy {{transactions.length}} giao dịch</p>
+        {{/if}}
+    </div>
+    {{/if}}
+
+    {{#if transactions.length}}
+        <div class="transaction-list">
+            {{#each transactions}}
+            <div class="transaction-item">
+                <div class="transaction-icon {{this.type}}">
+                    <i class="fas {{#if (eq this.type 'expense')}}fa-arrow-down{{else}}fa-arrow-up{{/if}}"></i>
+                </div>
+                <div class="transaction-info">
+                    <div class="transaction-title">{{this.description}}</div>
+                    <div class="transaction-meta">
+                        <i class="fas fa-tag"></i> {{this.category}}
+                        <i class="fas fa-calendar ms-2"></i> {{formatDate this.date}}
+                    </div>
+                </div>
+                <div class="transaction-amount {{this.type}}">
+                    {{#if (eq this.type 'expense')}}-{{/if}}{{formatMoney this.amount}}
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    {{else}}
+        {{#if searchQuery}}
+        <div class="text-center py-5">
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h5>Không tìm thấy giao dịch nào</h5>
+            <p class="text-muted">Thử tìm kiếm với từ khóa khác</p>
+        </div>
+        {{/if}}
+    {{/if}}
+</div>
+
+<style>
+.transaction-list {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.transaction-item:hover {
+    background-color: #f8f9fa;
+}
+
+.transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: white;
+}
+
+.transaction-icon.expense {
+    background-color: #dc3545;
+}
+
+.transaction-icon.income {
+    background-color: #198754;
+}
+
+.transaction-info {
+    flex-grow: 1;
+}
+
+.transaction-title {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.transaction-meta {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.transaction-meta i {
+    margin-right: 5px;
+}
+
+.transaction-amount {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.transaction-amount.expense {
+    color: #dc3545;
+}
+
+.transaction-amount.income {
+    color: #198754;
+}
+</style>

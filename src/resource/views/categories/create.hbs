@@ -1,0 +1,51 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Thêm danh mục mới</h4>
+                </div>
+                <div class="card-body">
+                    <form action="/categories/store" method="POST">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Tên danh mục</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Loại danh mục</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="type" id="expense" value="expense" checked>
+                                <label class="btn btn-outline-danger" for="expense">Chi tiêu</label>
+                                <input type="radio" class="btn-check" name="type" id="income" value="income">
+                                <label class="btn btn-outline-success" for="income">Thu nhập</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="icon" class="form-label">Icon</label>
+                            <select class="form-select" id="icon" name="icon">
+                                <option value="restaurant">🍽️ Ăn uống</option>
+                                <option value="directions_car">🚗 Di chuyển</option>
+                                <option value="shopping_cart">🛒 Mua sắm</option>
+                                <option value="receipt">📄 Hóa đơn</option>
+                                <option value="sports_esports">🎮 Giải trí</option>
+                                <option value="favorite">❤️ Sức khỏe</option>
+                                <option value="school">🎓 Giáo dục</option>
+                                <option value="payments">💰 Lương</option>
+                                <option value="card_giftcard">🎁 Thưởng</option>
+                                <option value="trending_up">📈 Đầu tư</option>
+                                <option value="more_horiz">⋯ Khác</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="/categories" class="btn btn-secondary">Hủy</a>
+                            <button type="submit" class="btn btn-primary">Thêm danh mục</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

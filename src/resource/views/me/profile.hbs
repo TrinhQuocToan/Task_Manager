@@ -1,0 +1,157 @@
+<div class="container py-5">
+    <div class="row">
+        <!-- Profile Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <img src="{{user.avatar}}" 
+                         
+                         class="rounded-circle mb-3" 
+                         width="150" 
+                         height="150">
+                    <h5 class="card-title mb-1">{{user.username}}</h5>
+                    <p class="text-muted mb-2">{{user.email}}</p>
+                    <div class="social-links mb-3">
+                        {{#if user.facebook}}
+                        <a href="{{user.facebook}}" class="mx-2" target="_blank">
+                            <i class="fab fa-facebook fa-lg text-primary"></i>
+                        </a>
+                        {{/if}}
+                        {{#if user.instagram}}
+                        <a href="{{user.instagram}}" class="mx-2" target="_blank">
+                            <i class="fab fa-instagram fa-lg text-danger"></i>
+                        </a>
+                        {{/if}}
+                    </div>
+                    <p class="text-muted">
+                        <small>Tham gia từ: {{formatDate user.createdAt}}</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-edit"></i> Thông Tin Cá Nhân
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{#if messages.success}}
+                        <div class="alert alert-success">
+                            {{messages.success}}
+                        </div>
+                    {{/if}}
+                    {{#if messages.error}}
+                        <div class="alert alert-danger">
+                            {{messages.error}}
+                        </div>
+                    {{/if}}
+
+                    <form action="/me/profile?_method=PUT" method="POST">
+                        <input type="hidden" name="_method" value="PUT">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user"></i> Tên Người Dùng
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="username" 
+                                   name="username" 
+                                   value="{{user.username}}"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope"></i> Email
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email" 
+                                   value="{{user.email}}"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">
+                                <i class="fas fa-phone"></i> Số Điện Thoại
+                            </label>
+                            <input type="tel" 
+                                   class="form-control" 
+                                   id="phone" 
+                                   name="phone" 
+                                   value="{{user.phone}}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="address" class="form-label">
+                                <i class="fas fa-map-marker-alt"></i> Địa Chỉ
+                            </label>
+                            <textarea class="form-control" 
+                                      id="address" 
+                                      name="address" 
+                                      rows="2">{{user.address}}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="avatar" class="form-label">
+                                <i class="fas fa-image"></i> URL Avatar
+                            </label>
+                            <input type="url" 
+                                   class="form-control" 
+                                   id="avatar" 
+                                   name="avatar" 
+                                   value="{{user.avatar}}">
+                            <small class="text-muted">Để trống để giữ avatar hiện tại</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="facebook" class="form-label">
+                                <i class="fab fa-facebook"></i> Facebook URL
+                            </label>
+                            <input type="url" 
+                                   class="form-control" 
+                                   id="facebook" 
+                                   name="facebook" 
+                                   value="{{user.facebook.url}}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="instagram" class="form-label">
+                                <i class="fab fa-instagram"></i> Instagram URL
+                            </label>
+                            <input type="url" 
+                                   class="form-control" 
+                                   id="instagram" 
+                                   name="instagram" 
+                                   value="{{user.instagram}}">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Cập nhật thông tin
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Preview avatar when URL changes
+    document.getElementById('avatar').addEventListener('input', function() {
+        const avatarImg = document.querySelector('.rounded-circle');
+        if (this.value) {
+            avatarImg.src = this.value;
+        }
+    });
+
+    // Handle avatar load error
+    document.querySelector('.rounded-circle').addEventListener('error', function() {
+        this.src = 'https://secure.gravatar.com/avatar/default?s=200&d=mp';
+    });
+</script>
