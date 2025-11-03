@@ -1,33 +1,71 @@
-// Format utilities
-export const formatCurrency = (amount) => {
-  if (amount === undefined || amount === null) {
-    return '0 ₫';
-  }
-  return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' ₫';
-};
+// Format currency (not used in Task Manager but kept for compatibility)
+export function formatCurrency(amount) {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND'
+  }).format(amount);
+}
 
-export const formatDate = (date, format = 'DD/MM/YYYY') => {
-  if (!date) return '';
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
+// Format date
+export function formatDate(dateString) {
+  if (!dateString) return 'N/A';
   
-  if (format === 'DD/MM/YYYY') {
-    return `${day}/${month}/${year}`;
-  }
-  return `${day}/${month}/${year}`;
-};
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('vi-VN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
+}
 
-export const formatNumber = (number) => {
-  if (number === undefined || number === null) {
-    return '0';
-  }
-  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
+// Format date only (without time)
+export function formatDateOnly(dateString) {
+  if (!dateString) return 'N/A';
+  
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('vi-VN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(date);
+}
 
-export const calculatePercentage = (value, total) => {
-  if (!value || !total) return 0;
-  return Math.min((value / total) * 100, 100);
-};
+// Calculate percentage
+export function calculatePercentage(part, total) {
+  if (total === 0) return 0;
+  return Math.round((part / total) * 100);
+}
 
+// Get status badge class
+export function getStatusBadgeClass(status) {
+  const statusMap = {
+    'Not Started': 'bg-secondary',
+    'In Progress': 'bg-info',
+    'Completed': 'bg-success',
+    'Cancelled': 'bg-danger'
+  };
+  return statusMap[status] || 'bg-secondary';
+}
+
+// Get priority badge class
+export function getPriorityBadgeClass(priority) {
+  const priorityMap = {
+    'Low': 'bg-secondary',
+    'Medium': 'bg-warning',
+    'High': 'bg-danger'
+  };
+  return priorityMap[priority] || 'bg-secondary';
+}
+
+// Get status icon
+export function getStatusIcon(status) {
+  const iconMap = {
+    'Not Started': 'fa-circle',
+    'In Progress': 'fa-spinner',
+    'Completed': 'fa-check-circle',
+    'Cancelled': 'fa-times-circle'
+  };
+  return iconMap[status] || 'fa-circle';
+}

@@ -1,4 +1,5 @@
 import { api } from '../main.js';
+import { auth } from '../utils/auth.js';
 
 export function renderRegisterPage() {
   return `
@@ -6,7 +7,7 @@ export function renderRegisterPage() {
       <div class="row w-100 mx-0">
         <div class="col-md-6 welcome-section">
           <h1 class="welcome-text">
-            Bắt đầu hành trình quản lý tài chính!
+            Bắt đầu quản lý công việc!
             <span>Tham gia cùng chúng tôi ngay hôm nay</span>
           </h1>
         </div>
@@ -14,7 +15,7 @@ export function renderRegisterPage() {
         <div class="col-md-6 form-section">
           <div class="login-form">
             <h2 class="mb-4">Đăng ký</h2>
-            <p class="text-muted mb-4">Tạo tài khoản mới để bắt đầu quản lý tài chính của bạn.</p>
+            <p class="text-muted mb-4">Tạo tài khoản mới để bắt đầu quản lý công việc của bạn.</p>
 
             <div id="register-messages"></div>
 
@@ -47,7 +48,10 @@ export function renderRegisterPage() {
                 <input type="password" class="form-control" name="confirmPassword" placeholder="Xác nhận mật khẩu" required>
               </div>
 
-              <button type="submit" class="btn btn-primary w-100 mb-3">Đăng ký</button>
+              <button type="submit" class="btn btn-primary w-100 mb-3" id="register-btn">
+                <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                Đăng ký
+              </button>
 
               <div class="mt-4 text-center">
                 <span class="me-2">Đã có tài khoản?</span>
@@ -63,36 +67,86 @@ export function renderRegisterPage() {
 
 export function initRegisterPage() {
   const form = document.getElementById('register-form');
+  const registerBtn = document.getElementById('register-btn');
+  const spinner = registerBtn?.querySelector('.spinner-border');
+  
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      // Disable button and show spinner
+      if (registerBtn) {
+        registerBtn.disabled = true;
+        if (spinner) spinner.classList.remove('d-none');
+      }
+
       const formData = new FormData(form);
       const password = formData.get('password');
       const confirmPassword = formData.get('confirmPassword');
 
+      // Client-side validation
       if (password !== confirmPassword) {
         showMessage('error', 'Mật khẩu xác nhận không khớp');
+        if (registerBtn) {
+          registerBtn.disabled = false;
+          if (spinner) spinner.classList.add('d-none');
+        }
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage('error', 'Mật khẩu phải có ít nhất 6 ký tự');
+        if (registerBtn) {
+          registerBtn.disabled = false;
+          if (spinner) spinner.classList.add('d-none');
+        }
         return;
       }
 
       const data = {
         username: formData.get('username'),
         email: formData.get('email'),
-        password: password
+        password: password,
+        confirmPassword: confirmPassword
       };
 
       try {
-        const response = await api.post('/auth/register', data);
-        if (response.success || response.user) {
-          showMessage('success', 'Đăng ký thành công! Đang chuyển hướng...');
+        const response = await api.post('/api/auth/register', data);
+        
+        if (response.success && response.data) {
+          // Save token if provided
+          if (response.data.token) {
+            auth.setToken(response.data.token);
+          }
+          
+          showMessage('success', response.message || 'Đăng ký thành công! Đang chuyển hướng...');
+          
           setTimeout(() => {
-            window.location.href = '/auth/login';
+            // If token exists, go to home, otherwise go to login
+            if (response.data.token) {
+              window.location.href = '/';
+            } else {
+              window.location.href = '/auth/login';
+            }
           }, 1500);
         } else {
           showMessage('error', response.message || 'Đăng ký thất bại');
+          
+          // Re-enable button
+          if (registerBtn) {
+            registerBtn.disabled = false;
+            if (spinner) spinner.classList.add('d-none');
+          }
         }
       } catch (error) {
+        console.error('Register error:', error);
         showMessage('error', 'Đăng ký thất bại. Vui lòng thử lại.');
+        
+        // Re-enable button
+        if (registerBtn) {
+          registerBtn.disabled = false;
+          if (spinner) spinner.classList.add('d-none');
+        }
       }
     });
   }

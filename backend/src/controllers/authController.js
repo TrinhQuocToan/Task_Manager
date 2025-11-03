@@ -232,9 +232,201 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+exports.updateProfile = async (req, res) => {
+    try {
+        const { username, email, avatar } = req.body;
+        const userId = req.userId;
+
+        // Find user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Check if username is being changed and if it's already taken
+        if (username && username !== user.username) {
+            const existingUser = await User.findOne({ 
+                username: username,
+                _id: { $ne: userId }
+            });
+            if (existingUser) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Username already exists'
+                });
+            }
+            user.username = username;
+        }
+
+        // Check if email is being changed and if it's already taken
+        if (email && email !== user.email) {
+            const existingUser = await User.findOne({ 
+                email: email.toLowerCase(),
+                _id: { $ne: userId }
+            });
+            if (existingUser) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Email already exists'
+                });
+            }
+            user.email = email.toLowerCase();
+        }
+
+        // Update avatar if provided
+        if (avatar !== undefined) {
+            user.avatar = avatar;
+        }
+
+        await user.save();
+
+        res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            data: { user }
+        });
+    } catch (error) {
+        console.error('Update profile error:', error);
+        
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({
+                success: false,
+                message: messages.join(', ')
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Server error during profile update'
+        });
+    }
+};
+
+// @desc    Change password
+// @route   PUT /api/auth/change-password
+// @access  Private
+exports.changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+        const userId = req.userId;
+
+        // Validate input
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide current password, new password and confirm password'
+            });
+        }
+
+        // Validate password match
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'New passwords do not match'
+            });
+        }
+
+        // Validate password length
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be at least 6 characters'
+            });
+        }
+
+        // Validate current password is not same as new password
+        if (currentPassword === newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'New password must be different from current password'
+            });
+        }
+
+        // Find user with password field
+        const user = await User.findById(userId).select('+password');
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Verify current password
+        const isPasswordValid = await user.comparePassword(currentPassword);
+        if (!isPasswordValid) {
+            return res.status(400).json({
+                success: false,
+                message: 'Current password is incorrect'
+            });
+        }
+
+        // Update password
+        user.password = newPassword;
+        await user.save();
+
+        // Send email notification
+        try {
+            sendPasswordChangedEmail(user.email, user.username);
+        } catch (emailError) {
+            console.error('Failed to send password changed email:', emailError);
+            // Don't fail the request if email fails
+        }
+
+        res.json({
+            success: true,
+            message: 'Password changed successfully'
+        });
+    } catch (error) {
+        console.error('Change password error:', error);
+        
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({
+                success: false,
+                message: messages.join(', ')
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Server error during password change'
+        });
+    }
+};
+
+// @desc    Get all users (for admin/testing)
+// @route   GET /api/auth/users
+// @access  Public (can be protected later)
+exports.getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            data: {
+                users,
+                count: users.length
+            }
+        });
+    } catch (error) {
+        console.error('Get all users error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
+
 // @desc    Get user by ID
 // @route   GET /api/auth/users/:id
-// @access  Public
+// @access  Public (can be protected later)
 exports.getUserById = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);

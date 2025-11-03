@@ -1,0 +1,11 @@
+{
+  "watch": ["src", "index.js"],
+  "ext": "js,json",
+  "ignore": ["node_modules", "src/views", "src/public"],
+  "exec": "node index.js",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": 1000
+}
+

@@ -5,7 +5,9 @@ const {
     login, 
     getMe,
     getAllUsers,
-    getUserById 
+    getUserById,
+    updateProfile,
+    changePassword
 } = require('../controllers/authController');
 
 const {
@@ -30,5 +32,7 @@ router.post('/resend-otp', resendOTP);
 
 // Protected routes (require JWT token)
 router.get('/me', protect, getMe);
+router.put('/profile', protect, updateProfile);
+router.put('/change-password', protect, changePassword);
 
 module.exports = router;

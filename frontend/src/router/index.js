@@ -70,15 +70,25 @@ class Router {
   findRoute(path) {
     // Exact match first
     if (this.routes[path]) {
-      return this.routes[path];
+      return () => this.routes[path]();
     }
     
-    // Try pattern matching
+    // Try pattern matching with params
     for (const route in this.routes) {
-      const pattern = route.replace(/:[^/]+/g, '([^/]+)');
+      const paramNames = [];
+      const pattern = route.replace(/:([^/]+)/g, (match, paramName) => {
+        paramNames.push(paramName);
+        return '([^/]+)';
+      });
       const regex = new RegExp(`^${pattern}$`);
-      if (regex.test(path)) {
-        return this.routes[route];
+      const match = path.match(regex);
+      
+      if (match) {
+        const params = {};
+        paramNames.forEach((name, index) => {
+          params[name] = match[index + 1];
+        });
+        return () => this.routes[route](params);
       }
     }
     
@@ -87,6 +97,9 @@ class Router {
 }
 
 const router = new Router();
+
+// Expose router to window for global access
+window.router = router;
 
 export default router;
 

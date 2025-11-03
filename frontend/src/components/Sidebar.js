@@ -8,17 +8,18 @@ export function renderSidebar(activeRoute = '') {
         <i class="fas fa-home"></i>
         <span>Trang chủ</span>
       </a>
-      <a href="/transactions" class="nav-link ${activeRoute === '/transactions' ? 'active' : ''}" data-link="/transactions">
-        <i class="fas fa-exchange-alt"></i>
-        <span>Giao dịch</span>
+      <a href="/tasks" class="nav-link ${activeRoute === '/tasks' ? 'active' : ''}" data-link="/tasks">
+        <i class="fas fa-check-square"></i>
+        <span>Công việc</span>
+      </a>
+      
+      <a href="/categories" class="nav-link ${activeRoute === '/categories' ? 'active' : ''}" data-link="/categories">
+        <i class="fas fa-tags"></i>
+        <span>Danh mục</span>
       </a>
       <a href="/statistics" class="nav-link ${activeRoute === '/statistics' ? 'active' : ''}" data-link="/statistics">
         <i class="fas fa-chart-line"></i>
         <span>Thống kê</span>
-      </a>
-      <a href="/categories" class="nav-link ${activeRoute === '/categories' ? 'active' : ''}" data-link="/categories">
-        <i class="fas fa-tags"></i>
-        <span>Danh mục</span>
       </a>
     </div>
   `;

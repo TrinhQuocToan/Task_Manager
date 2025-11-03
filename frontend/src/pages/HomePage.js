@@ -1,26 +1,19 @@
-import { api } from '../main.js';
+import { api, getCurrentUser } from '../main.js';
 import { formatCurrency, formatDate, calculatePercentage } from '../utils/format.js';
-
-// Get current user (mock for now, will be replaced with real auth)
-let currentUser = null;
+import { renderScheduleCalendar } from '../components/ScheduleCalendar.js';
 
 export async function renderHomePage() {
   try {
-    // Try to get user data
-    try {
-      const response = await fetch('http://localhost:3000/api/me');
-      if (response.ok) {
-        currentUser = await response.json();
-      }
-    } catch (e) {
-      // Not logged in
-    }
+    // Get current user using the auth API
+    const user = await getCurrentUser();
 
-    if (!currentUser) {
+    // If no user, show guest page
+    if (!user) {
       return renderHomeGuest();
     }
 
-    return renderHomeUser();
+    // User is logged in, show user dashboard
+    return await renderHomeUser(user);
   } catch (error) {
     console.error('Error rendering home:', error);
     return renderHomeGuest();
@@ -29,13 +22,16 @@ export async function renderHomePage() {
 
 function renderHomeGuest() {
   return `
-    <div class="container py-5">
+    <div class="container py-5" style="margin-top: 0;">
       <div class="row justify-content-center">
         <div class="col-md-8 text-center">
-          <h1 class="display-4 mb-4">Quản Lý Chi Tiêu</h1>
+          <h1 class="display-4 mb-4">
+            <i class="fas fa-tasks text-primary me-3"></i>
+            Task Manager
+          </h1>
           <p class="lead mb-4">
-            Chào mừng bạn đến với ứng dụng Quản Lý Chi Tiêu. 
-            Đăng nhập hoặc đăng ký để bắt đầu quản lý tài chính của bạn.
+            Quản lý công việc hiệu quả và dễ dàng. 
+            Đăng nhập hoặc đăng ký để bắt đầu quản lý các nhiệm vụ của bạn.
           </p>
           <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
             <a href="/auth/login" class="btn btn-primary btn-lg px-4" data-link="/auth/login">
@@ -50,29 +46,29 @@ function renderHomeGuest() {
 
       <div class="row mt-5">
         <div class="col-md-4 mb-4">
-          <div class="card h-100">
+          <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-              <i class="fas fa-chart-line fa-3x mb-3 text-primary"></i>
-              <h5 class="card-title">Theo dõi chi tiêu</h5>
-              <p class="card-text">Ghi chép và theo dõi mọi khoản thu chi của bạn một cách dễ dàng</p>
+              <i class="fas fa-check-square fa-3x mb-3 text-primary"></i>
+              <h5 class="card-title">Quản lý công việc</h5>
+              <p class="card-text">Tạo, theo dõi và hoàn thành các nhiệm vụ của bạn một cách dễ dàng và hiệu quả</p>
             </div>
           </div>
         </div>
         <div class="col-md-4 mb-4">
-          <div class="card h-100">
+          <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-              <i class="fas fa-chart-pie fa-3x mb-3 text-success"></i>
-              <h5 class="card-title">Phân tích chi tiêu</h5>
-              <p class="card-text">Xem báo cáo và thống kê chi tiết về tình hình tài chính của bạn</p>
+              <i class="fas fa-project-diagram fa-3x mb-3 text-success"></i>
+              <h5 class="card-title">Quản lý dự án</h5>
+              <p class="card-text">Tổ chức công việc theo dự án, theo dõi tiến độ và cộng tác với đội nhóm</p>
             </div>
           </div>
         </div>
         <div class="col-md-4 mb-4">
-          <div class="card h-100">
+          <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-              <i class="fas fa-piggy-bank fa-3x mb-3 text-warning"></i>
-              <h5 class="card-title">Quản lý ngân sách</h5>
-              <p class="card-text">Lập kế hoạch và kiểm soát chi tiêu theo mục tiêu tài chính</p>
+              <i class="fas fa-chart-bar fa-3x mb-3 text-warning"></i>
+              <h5 class="card-title">Thống kê & Báo cáo</h5>
+              <p class="card-text">Xem báo cáo chi tiết về hiệu suất công việc và tiến độ hoàn thành</p>
             </div>
           </div>
         </div>
@@ -81,18 +77,27 @@ function renderHomeGuest() {
   `;
 }
 
-async function renderHomeUser() {
+async function renderHomeUser(user) {
   try {
-    // Fetch user data
-    const homeData = await api.get('/api/home');
-    
+    // Fetch statistics and all tasks for calendar
+    const [statsResponse, allTasksResponse] = await Promise.all([
+      api.get('/api/tasks/statistics').catch(() => ({ data: {} })),
+      api.get('/api/tasks?sortBy=dueDate&sortOrder=asc').catch(() => ({ data: { tasks: [] } }))
+    ]);
+
+    const stats = statsResponse.data || {};
+    const allTasks = allTasksResponse.data?.tasks || [];
+
     return `
       <div class="homepage">
-        <div class="container py-4">
+        <div class="container py-4" style="margin-top: 0;">
           <div class="card mb-4 border-0 shadow-sm">
             <div class="card-body position-relative">
-              <a href="/transactions/create" class="btn btn-success rounded-circle position-absolute top-0 end-0 m-3 add-transaction-btn" 
-                 data-link="/transactions/create">
+              <a href="/tasks/create" class="btn btn-success rounded-circle position-absolute top-0 end-0 m-3 add-task-btn" 
+                 data-link="/tasks/create"
+                 data-bs-toggle="tooltip" 
+                 data-bs-placement="left" 
+                 title="Tạo công việc mới">
                 <i class="fas fa-plus"></i>
               </a>
 
@@ -100,39 +105,47 @@ async function renderHomeUser() {
                 <div class="col-md-8">
                   <div class="d-flex align-items-center mb-3">
                     <div class="balance-icon me-3">
-                      ${homeData.user?.avatar ? 
-                        `<img src="${homeData.user.avatar}" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px;">` :
-                        `<i class="fas fa-wallet fa-2x text-primary"></i>`
+                      ${user?.avatar ? 
+                        `<img src="${user.avatar}" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px;">` :
+                        `<i class="fas fa-tasks fa-2x text-primary"></i>`
                       }
                     </div>
                     <div>
-                      <h5 class="mb-0">Xin chào, ${homeData.user?.username || '!'}</h5>
-                      <p class="text-muted mb-0">Đây là tổng quan tài chính của bạn</p>
+                      <h5 class="mb-0">Xin chào, ${user?.username || '!'}</h5>
+                      <p class="text-muted mb-0">Tổng quan công việc của bạn</p>
                     </div>
                   </div>
+                  
+                  ${stats.totalTasks === 0 ? `
+                    <div class="alert alert-info">
+                      <i class="fas fa-info-circle me-2"></i>
+                      Chào mừng đến với Task Manager! Bắt đầu tạo công việc đầu tiên của bạn.
+                    </div>
+                  ` : ''}
                 </div>
                 <div class="col-md-4">
-                  <div class="income-expense-comparison p-3 rounded bg-light h-100">
-                    <h5 class="mb-3">Thu chi tháng này</h5>
-                    <div class="comparison-item mb-3">
-                      <div class="d-flex justify-content-between mb-1">
-                        <span>Thu nhập</span>
-                        <span class="text-success">${formatCurrency(homeData.monthlyIncome || 0)}</span>
-                      </div>
-                      <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                  <div class="task-stats p-3 rounded bg-light h-100">
+                    <h5 class="mb-3">Thống kê nhanh</h5>
+                    <div class="stat-item mb-3">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span><i class="fas fa-tasks text-primary me-2"></i>Tổng công việc</span>
+                        <span class="fw-bold">${stats.totalTasks || 0}</span>
                       </div>
                     </div>
-                    <div class="comparison-item mb-3">
-                      <div class="d-flex justify-content-between mb-1">
-                        <span>Chi tiêu</span>
-                        <span class="text-danger">${formatCurrency(homeData.monthlyExpense || 0)}</span>
+                    <div class="stat-item mb-3">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span><i class="fas fa-check-circle text-success me-2"></i>Hoàn thành</span>
+                        <span class="fw-bold text-success">${stats.completedTasks || 0}</span>
                       </div>
-                      <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-danger" 
-                             style="width: ${calculatePercentage(homeData.monthlyExpense || 0, homeData.monthlyIncome || 1)}%">
-                        </div>
+                    </div>
+                    <div class="stat-item mb-3">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span><i class="fas fa-spinner text-info me-2"></i>Đang làm</span>
+                        <span class="fw-bold text-info">${stats.inProgressTasks || 0}</span>
                       </div>
+                    </div>
+                    <div class="text-center mt-3">
+                      <a href="/tasks" class="btn btn-sm btn-outline-primary" data-link="/tasks">Xem tất cả</a>
                     </div>
                   </div>
                 </div>
@@ -142,54 +155,78 @@ async function renderHomeUser() {
 
           <div class="card border-0 shadow-sm">
             <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="card-title mb-0">Giao dịch gần đây</h5>
-                <a href="/transactions" class="btn btn-link" data-link="/transactions">Xem tất cả</a>
-              </div>
-              <div class="recent-transactions">
-                ${renderRecentTransactions(homeData.recentTransactions || [])}
-              </div>
+              ${renderScheduleCalendar(allTasks)}
             </div>
           </div>
         </div>
       </div>
     `;
   } catch (error) {
-    console.error('Error fetching home data:', error);
+    console.error('Error rendering user home:', error);
     return renderHomeGuest();
   }
 }
 
-function renderRecentTransactions(transactions) {
-  if (transactions.length === 0) {
+function renderRecentTasks(tasks) {
+  if (tasks.length === 0) {
     return `
       <div class="text-center py-4">
         <div class="mb-3">
-          <i class="fas fa-receipt fa-3x text-muted"></i>
+          <i class="fas fa-tasks fa-3x text-muted"></i>
         </div>
-        <p class="text-muted">Chưa có giao dịch nào</p>
-        <a href="/transactions/create" class="btn btn-primary" data-link="/transactions/create">Thêm giao dịch đầu tiên</a>
+        <p class="text-muted">Chưa có công việc nào</p>
+        <a href="/tasks/create" class="btn btn-primary" data-link="/tasks/create">
+          <i class="fas fa-plus me-2"></i>Tạo công việc đầu tiên
+        </a>
       </div>
     `;
   }
 
-  return transactions.map(transaction => `
-    <div class="transaction-item p-3 mb-2 rounded ${transaction.type === 'expense' ? 'bg-danger-subtle' : 'bg-success-subtle'}">
-      <div class="d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-          <div class="transaction-icon me-3">
-            <i class="fas fa-tag fa-fw"></i>
+  return tasks.map(task => {
+    const statusClass = {
+      'Not Started': 'bg-secondary-subtle',
+      'In Progress': 'bg-info-subtle',
+      'Completed': 'bg-success-subtle',
+      'Cancelled': 'bg-danger-subtle'
+    }[task.status] || 'bg-secondary-subtle';
+    
+    const statusIcon = {
+      'Not Started': 'fa-circle',
+      'In Progress': 'fa-spinner',
+      'Completed': 'fa-check-circle',
+      'Cancelled': 'fa-times-circle'
+    }[task.status] || 'fa-circle';
+    
+    const statusColor = {
+      'Not Started': 'text-secondary',
+      'In Progress': 'text-info',
+      'Completed': 'text-success',
+      'Cancelled': 'text-danger'
+    }[task.status] || 'text-secondary';
+
+    return `
+      <div class="task-item p-3 mb-2 rounded ${statusClass}" style="cursor: pointer;" onclick="window.location.href='/tasks/${task._id}'">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="d-flex align-items-center flex-grow-1">
+            <div class="task-icon me-3">
+              <i class="fas ${statusIcon} ${statusColor} fa-fw"></i>
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-1">${task.title || 'Công việc không có tiêu đề'}</h6>
+              <small class="text-muted">
+                ${task.categoryId ? `<i class="fas ${task.categoryId.icon || 'fa-tag'} me-1"></i>${task.categoryId.name || 'N/A'}` : ''}
+                ${task.dueDate ? ` • <i class="fas fa-calendar me-1"></i>${formatDate(task.dueDate)}` : ''}
+                ${task.priority ? ` • <i class="fas fa-flag me-1"></i>${task.priority}` : ''}
+              </small>
+            </div>
           </div>
-          <div>
-            <h6 class="mb-0">${transaction.categoryId?.name || 'Khác'}</h6>
-            <small class="text-muted">${formatDate(transaction.date)}</small>
+          <div class="d-flex align-items-center">
+            ${task.status === 'Completed' ? '<span class="badge bg-success me-2">Hoàn thành</span>' : ''}
+            <i class="fas fa-chevron-right text-muted"></i>
           </div>
-        </div>
-        <div class="text-${transaction.type === 'expense' ? 'danger' : 'success'}">
-          ${transaction.type === 'expense' ? '-' : ''}${formatCurrency(transaction.amount)}
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 

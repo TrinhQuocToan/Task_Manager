@@ -1,4 +1,5 @@
 import { api } from '../main.js';
+import { auth } from '../utils/auth.js';
 
 export function renderLoginPage() {
   return `
@@ -7,7 +8,7 @@ export function renderLoginPage() {
         <div class="col-md-6 welcome-section">
           <h1 class="welcome-text">
             Chào mừng quay trở lại!
-            <span>Hãy quản lý tài chính của bạn một cách thông minh</span>
+            <span>Quản lý công việc của bạn hiệu quả hơn</span>
           </h1>
         </div>
         
@@ -21,9 +22,9 @@ export function renderLoginPage() {
             <form id="login-form">
               <div class="mb-3">
                 <label class="form-label">
-                  <i class="far fa-envelope me-2"></i>Email
+                  <i class="fas fa-user me-2"></i>Tên đăng nhập
                 </label>
-                <input type="email" class="form-control" name="email" placeholder="Email" required>
+                <input type="text" class="form-control" name="username" placeholder="Tên đăng nhập" required>
               </div>
 
               <div class="mb-3">
@@ -33,11 +34,10 @@ export function renderLoginPage() {
                 <input type="password" class="form-control" name="password" placeholder="Mật khẩu" required>
               </div>
 
-              <button type="submit" class="btn btn-primary w-100 mb-3">Đăng nhập</button>
-
-              <a href="/auth/google" class="btn btn-google w-100" data-link="/auth/google">
-                <i class="fab fa-google me-2"></i>Đăng nhập với Google
-              </a>
+              <button type="submit" class="btn btn-primary w-100 mb-3" id="login-btn">
+                <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                Đăng nhập
+              </button>
 
               <div class="mt-4 text-center">
                 <span class="me-2">Bạn chưa có tài khoản?</span>
@@ -55,24 +55,58 @@ export function renderLoginPage() {
 
 export function initLoginPage() {
   const form = document.getElementById('login-form');
+  const loginBtn = document.getElementById('login-btn');
+  const spinner = loginBtn?.querySelector('.spinner-border');
+  
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      // Disable button and show spinner
+      if (loginBtn) {
+        loginBtn.disabled = true;
+        if (spinner) spinner.classList.remove('d-none');
+      }
+
       const formData = new FormData(form);
       const data = {
-        email: formData.get('email'),
+        username: formData.get('username'),
         password: formData.get('password')
       };
 
       try {
-        const response = await api.post('/auth/login', data);
-        if (response.success || response.user) {
-          window.location.href = '/';
+        const response = await api.post('/api/auth/login', data);
+        
+        if (response.success && response.data) {
+          // Save token
+          if (response.data.token) {
+            auth.setToken(response.data.token);
+          }
+          
+          showMessage('success', response.message || 'Đăng nhập thành công!');
+          
+          // Redirect to home after short delay
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 500);
         } else {
           showMessage('error', response.message || 'Đăng nhập thất bại');
+          
+          // Re-enable button
+          if (loginBtn) {
+            loginBtn.disabled = false;
+            if (spinner) spinner.classList.add('d-none');
+          }
         }
       } catch (error) {
-        showMessage('error', 'Đăng nhập thất bại. Vui lòng thử lại.');
+        console.error('Login error:', error);
+        showMessage('error', 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
+        
+        // Re-enable button
+        if (loginBtn) {
+          loginBtn.disabled = false;
+          if (spinner) spinner.classList.add('d-none');
+        }
       }
     });
   }

@@ -1,0 +1,220 @@
+/* Schedule Calendar Styles */
+.schedule-calendar {
+  width: 100%;
+}
+
+.calendar-header {
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.calendar-day {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 0.75rem;
+  min-height: 400px;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.calendar-day:hover {
+  background: #e9ecef;
+  border-color: #198754;
+}
+
+.calendar-day.today {
+  background: #e7f5e9;
+  border-color: #198754;
+  box-shadow: 0 2px 8px rgba(25, 135, 84, 0.2);
+}
+
+.day-header {
+  text-align: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.day-name {
+  font-weight: 600;
+  color: #6c757d;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.day-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0.25rem 0;
+}
+
+.day-number.today-badge {
+  background: #198754;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.25rem auto;
+}
+
+.day-month {
+  font-size: 0.75rem;
+  color: #6c757d;
+  text-transform: uppercase;
+}
+
+.day-count {
+  font-size: 0.75rem;
+  color: #198754;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+.day-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.task-card {
+  background: white;
+  border-radius: 6px;
+  padding: 0.75rem;
+  border-left: 4px solid #198754;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.task-card.bg-secondary {
+  border-left-color: #6c757d;
+}
+
+.task-card.bg-info {
+  border-left-color: #0dcaf0;
+}
+
+.task-card.bg-success {
+  border-left-color: #198754;
+}
+
+.task-card.bg-danger {
+  border-left-color: #dc3545;
+}
+
+.task-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.badge-sm {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.task-card-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #212529;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.task-card-category {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.task-card-description {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.no-tasks {
+  font-size: 0.85rem;
+  padding: 1rem 0;
+}
+
+.more-tasks {
+  padding: 0.5rem;
+  background: rgba(25, 135, 84, 0.1);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+.calendar-nav button {
+  border: 1px solid #dee2e6;
+  padding: 0.25rem 0.5rem;
+}
+
+.calendar-nav button:hover {
+  background-color: #198754;
+  border-color: #198754;
+  color: white;
+}
+
+/* Scrollbar styling for day-tasks */
+.day-tasks::-webkit-scrollbar {
+  width: 4px;
+}
+
+.day-tasks::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.day-tasks::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 2px;
+}
+
+.day-tasks::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .calendar-week {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-week {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .calendar-day {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 576px) {
+  .calendar-week {
+    grid-template-columns: 1fr;
+  }
+}
+
