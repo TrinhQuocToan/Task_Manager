@@ -30,7 +30,9 @@ class Router {
 
   navigate(path) {
     if (this.isNavigating) return; // Prevent infinite loops
-    if (path === window.location.pathname) return; // Already on this route
+    // Consider query string changes as navigation too
+    const current = window.location.pathname + window.location.search;
+    if (path === current) return; // Already on this exact URL
     
     this.isNavigating = true;
     window.history.pushState({}, '', path);
@@ -38,7 +40,8 @@ class Router {
   }
 
   handleRoute() {
-    if (this.isNavigating && this.currentRoute === window.location.pathname) {
+    const fullPath = window.location.pathname + window.location.search;
+    if (this.isNavigating && this.currentRoute === fullPath) {
       this.isNavigating = false;
       return; // Prevent re-rendering the same route
     }
@@ -47,7 +50,7 @@ class Router {
     const handler = this.findRoute(path);
     
     if (handler) {
-      this.currentRoute = path;
+      this.currentRoute = fullPath;
       this.isNavigating = false;
       try {
         handler();

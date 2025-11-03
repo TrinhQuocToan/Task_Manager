@@ -18,7 +18,7 @@ export async function renderProfilePage() {
             <div class="card border-0 shadow-sm">
               <div class="card-header bg-white">
                 <h4 class="mb-0">
-                  <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
+                  <i class="fas fa-user me-2"></i>Profile
                 </h4>
               </div>
               <div class="card-body">
@@ -35,7 +35,7 @@ export async function renderProfilePage() {
       <div class="container-fluid py-4" style="margin-top: 0;">
         <div class="alert alert-danger">
           <i class="fas fa-exclamation-triangle me-2"></i>
-          Không thể tải thông tin hồ sơ. Vui lòng thử lại.
+          Failed to load profile. Please try again.
         </div>
       </div>
     `;
@@ -61,24 +61,24 @@ function renderProfileForm(user) {
           <input type="file" id="avatar-input" accept="image/*" style="display: none;">
           <input type="hidden" id="avatar-url" name="avatar" value="${user.avatar || ''}">
         </div>
-        <p class="text-muted mt-2">Click vào icon camera để thay đổi avatar</p>
+        <p class="text-muted mt-2">Click the camera icon to change avatar</p>
       </div>
 
       <div class="mb-3">
         <label class="form-label">
-          <i class="fas fa-user me-2"></i>Tên đăng nhập <span class="text-danger">*</span>
+          <i class="fas fa-user me-2"></i>Username <span class="text-danger">*</span>
         </label>
         <input 
           type="text" 
           class="form-control" 
           name="username" 
           value="${user.username || ''}"
-          placeholder="Tên đăng nhập"
+          placeholder="Username"
           required
           minlength="3"
           maxlength="20"
         >
-        <small class="form-text text-muted">Tên đăng nhập phải có từ 3-20 ký tự</small>
+        <small class="form-text text-muted">Username must be 3-20 characters</small>
       </div>
 
       <div class="mb-3">
@@ -98,12 +98,12 @@ function renderProfileForm(user) {
 
       <div class="mb-3">
         <label class="form-label">
-          <i class="fas fa-calendar me-2"></i>Ngày tham gia
+          <i class="fas fa-calendar me-2"></i>Joined
         </label>
         <input 
           type="text" 
           class="form-control" 
-          value="${user.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN') : 'N/A'}"
+          value="${user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US') : 'N/A'}"
           disabled
           style="background-color: #f8f9fa;"
         >
@@ -113,17 +113,17 @@ function renderProfileForm(user) {
 
       <div class="mb-3">
         <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-          <i class="fas fa-key me-2"></i>Đổi mật khẩu
+          <i class="fas fa-key me-2"></i>Change password
         </button>
       </div>
 
       <div class="d-flex justify-content-between">
         <a href="/" class="btn btn-secondary" data-link="/">
-          <i class="fas fa-times me-2"></i>Hủy
+          <i class="fas fa-times me-2"></i>Cancel
         </a>
         <button type="submit" class="btn btn-primary" id="submit-btn">
           <span class="spinner-border spinner-border-sm d-none me-2" role="status"></span>
-          <i class="fas fa-save me-2"></i>Cập nhật hồ sơ
+          <i class="fas fa-save me-2"></i>Update profile
         </button>
       </div>
     </form>
@@ -134,7 +134,7 @@ function renderProfileForm(user) {
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="changePasswordModalLabel">
-              <i class="fas fa-lock me-2"></i>Đổi mật khẩu
+              <i class="fas fa-lock me-2"></i>Change password
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -142,7 +142,7 @@ function renderProfileForm(user) {
             <form id="change-password-form">
               <div class="mb-3">
                 <label class="form-label">
-                  <i class="fas fa-key me-2"></i>Mật khẩu hiện tại <span class="text-danger">*</span>
+                  <i class="fas fa-key me-2"></i>Current password <span class="text-danger">*</span>
                 </label>
                 <div class="input-group">
                   <input 
@@ -150,7 +150,7 @@ function renderProfileForm(user) {
                     class="form-control" 
                     name="currentPassword" 
                     id="modalCurrentPassword"
-                    placeholder="Nhập mật khẩu hiện tại"
+                    placeholder="Enter current password"
                     required
                     autocomplete="current-password"
                   >
@@ -166,7 +166,7 @@ function renderProfileForm(user) {
 
               <div class="mb-3">
                 <label class="form-label">
-                  <i class="fas fa-lock me-2"></i>Mật khẩu mới <span class="text-danger">*</span>
+                  <i class="fas fa-lock me-2"></i>New password <span class="text-danger">*</span>
                 </label>
                 <div class="input-group">
                   <input 
@@ -174,7 +174,7 @@ function renderProfileForm(user) {
                     class="form-control" 
                     name="newPassword" 
                     id="modalNewPassword"
-                    placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
+                    placeholder="Enter new password (min 6 characters)"
                     required
                     minlength="6"
                     autocomplete="new-password"
@@ -187,12 +187,12 @@ function renderProfileForm(user) {
                     <i class="fas fa-eye" id="modalNewPassword-eye"></i>
                   </button>
                 </div>
-                <small class="form-text text-muted">Mật khẩu mới phải có ít nhất 6 ký tự</small>
+                <small class="form-text text-muted">New password must be at least 6 characters</small>
               </div>
 
               <div class="mb-3">
                 <label class="form-label">
-                  <i class="fas fa-lock me-2"></i>Xác nhận mật khẩu mới <span class="text-danger">*</span>
+                  <i class="fas fa-lock me-2"></i>Confirm new password <span class="text-danger">*</span>
                 </label>
                 <div class="input-group">
                   <input 
@@ -200,7 +200,7 @@ function renderProfileForm(user) {
                     class="form-control" 
                     name="confirmNewPassword" 
                     id="modalConfirmNewPassword"
-                    placeholder="Nhập lại mật khẩu mới"
+                    placeholder="Re-enter new password"
                     required
                     minlength="6"
                     autocomplete="new-password"
@@ -218,11 +218,11 @@ function renderProfileForm(user) {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              <i class="fas fa-times me-2"></i>Hủy
+              <i class="fas fa-times me-2"></i>Cancel
             </button>
             <button type="button" class="btn btn-warning" id="modal-change-password-btn">
               <span class="spinner-border spinner-border-sm d-none me-2" role="status"></span>
-              <i class="fas fa-key me-2"></i>Đổi mật khẩu
+              <i class="fas fa-key me-2"></i>Change password
             </button>
           </div>
         </div>
@@ -300,13 +300,13 @@ export function initProfilePage() {
       const response = await api.put('/api/auth/profile', data);
 
       if (response.success) {
-        showMessage('success', response.message || 'Cập nhật hồ sơ thành công!');
+        showMessage('success', response.message || 'Profile updated successfully!');
         // Reload user data
         setTimeout(() => {
           window.location.reload();
         }, 1000);
       } else {
-        showMessage('error', response.message || 'Cập nhật hồ sơ thất bại');
+        showMessage('error', response.message || 'Profile update failed');
         if (submitBtn) {
           submitBtn.disabled = false;
           if (spinner) spinner.classList.add('d-none');
@@ -314,7 +314,7 @@ export function initProfilePage() {
       }
     } catch (error) {
       console.error('Profile update error:', error);
-      showMessage('error', error.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+      showMessage('error', error.message || 'An error occurred. Please try again.');
       if (submitBtn) {
         submitBtn.disabled = false;
         if (spinner) spinner.classList.add('d-none');
@@ -335,22 +335,22 @@ export function initProfilePage() {
 
       // Validation
       if (!currentPassword || !newPassword || !confirmNewPassword) {
-        showMessage('error', 'Vui lòng điền đầy đủ các trường mật khẩu');
+        showMessage('error', 'Please fill in all password fields');
         return;
       }
 
       if (newPassword.length < 6) {
-        showMessage('error', 'Mật khẩu mới phải có ít nhất 6 ký tự');
+        showMessage('error', 'New password must be at least 6 characters');
         return;
       }
 
       if (newPassword !== confirmNewPassword) {
-        showMessage('error', 'Mật khẩu mới và xác nhận không khớp');
+        showMessage('error', 'New password and confirmation do not match');
         return;
       }
 
       if (currentPassword === newPassword) {
-        showMessage('error', 'Mật khẩu mới phải khác mật khẩu hiện tại');
+        showMessage('error', 'New password must be different from current');
         return;
       }
 
@@ -367,7 +367,7 @@ export function initProfilePage() {
         });
 
         if (response.success) {
-          showMessage('success', response.message || 'Đổi mật khẩu thành công!');
+          showMessage('success', response.message || 'Password changed successfully!');
           
           // Clear password fields
           if (changePasswordForm) {
@@ -396,11 +396,11 @@ export function initProfilePage() {
             }
           }
         } else {
-          showMessage('error', response.message || 'Đổi mật khẩu thất bại');
+          showMessage('error', response.message || 'Password change failed');
         }
       } catch (error) {
         console.error('Change password error:', error);
-        showMessage('error', error.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+        showMessage('error', error.message || 'An error occurred. Please try again.');
       } finally {
         modalChangePasswordBtn.disabled = false;
         if (changePasswordSpinner) changePasswordSpinner.classList.add('d-none');

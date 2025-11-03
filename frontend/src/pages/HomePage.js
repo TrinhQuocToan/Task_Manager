@@ -30,15 +30,15 @@ function renderHomeGuest() {
             Task Manager
           </h1>
           <p class="lead mb-4">
-            Quản lý công việc hiệu quả và dễ dàng. 
-            Đăng nhập hoặc đăng ký để bắt đầu quản lý các nhiệm vụ của bạn.
+            Manage your tasks efficiently and effortlessly.
+            Login or register to get started.
           </p>
           <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
             <a href="/auth/login" class="btn btn-primary btn-lg px-4" data-link="/auth/login">
-              <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+              <i class="fas fa-sign-in-alt me-2"></i>Login
             </a>
             <a href="/auth/register" class="btn btn-outline-secondary btn-lg px-4" data-link="/auth/register">
-              <i class="fas fa-user-plus me-2"></i>Đăng ký
+              <i class="fas fa-user-plus me-2"></i>Register
             </a>
           </div>
         </div>
@@ -49,8 +49,8 @@ function renderHomeGuest() {
           <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
               <i class="fas fa-check-square fa-3x mb-3 text-primary"></i>
-              <h5 class="card-title">Quản lý công việc</h5>
-              <p class="card-text">Tạo, theo dõi và hoàn thành các nhiệm vụ của bạn một cách dễ dàng và hiệu quả</p>
+              <h5 class="card-title">Task management</h5>
+              <p class="card-text">Create, track and complete your tasks with ease</p>
             </div>
           </div>
         </div>
@@ -58,8 +58,8 @@ function renderHomeGuest() {
           <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
               <i class="fas fa-project-diagram fa-3x mb-3 text-success"></i>
-              <h5 class="card-title">Quản lý dự án</h5>
-              <p class="card-text">Tổ chức công việc theo dự án, theo dõi tiến độ và cộng tác với đội nhóm</p>
+              <h5 class="card-title">Project management</h5>
+              <p class="card-text">Organize tasks by projects and collaborate with your team</p>
             </div>
           </div>
         </div>
@@ -67,8 +67,8 @@ function renderHomeGuest() {
           <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
               <i class="fas fa-chart-bar fa-3x mb-3 text-warning"></i>
-              <h5 class="card-title">Thống kê & Báo cáo</h5>
-              <p class="card-text">Xem báo cáo chi tiết về hiệu suất công việc và tiến độ hoàn thành</p>
+              <h5 class="card-title">Analytics & Reports</h5>
+              <p class="card-text">View detailed insights on task progress and performance</p>
             </div>
           </div>
         </div>
@@ -111,41 +111,41 @@ async function renderHomeUser(user) {
                       }
                     </div>
                     <div>
-                      <h5 class="mb-0">Xin chào, ${user?.username || '!'}</h5>
-                      <p class="text-muted mb-0">Tổng quan công việc của bạn</p>
+                      <h5 class="mb-0">Hello, ${user?.username || ''}</h5>
+                      <p class="text-muted mb-0">Your task overview</p>
                     </div>
                   </div>
                   
                   ${stats.totalTasks === 0 ? `
                     <div class="alert alert-info">
                       <i class="fas fa-info-circle me-2"></i>
-                      Chào mừng đến với Task Manager! Bắt đầu tạo công việc đầu tiên của bạn.
+                      Welcome to Task Manager! Create your first task to get started.
                     </div>
                   ` : ''}
                 </div>
                 <div class="col-md-4">
                   <div class="task-stats p-3 rounded bg-light h-100">
-                    <h5 class="mb-3">Thống kê nhanh</h5>
+                    <h5 class="mb-3">Quick stats</h5>
                     <div class="stat-item mb-3">
                       <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span><i class="fas fa-tasks text-primary me-2"></i>Tổng công việc</span>
+                        <span><i class="fas fa-tasks text-primary me-2"></i>Total tasks</span>
                         <span class="fw-bold">${stats.totalTasks || 0}</span>
                       </div>
                     </div>
                     <div class="stat-item mb-3">
                       <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span><i class="fas fa-check-circle text-success me-2"></i>Hoàn thành</span>
+                        <span><i class="fas fa-check-circle text-success me-2"></i>Completed</span>
                         <span class="fw-bold text-success">${stats.completedTasks || 0}</span>
                       </div>
                     </div>
                     <div class="stat-item mb-3">
                       <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span><i class="fas fa-spinner text-info me-2"></i>Đang làm</span>
+                        <span><i class="fas fa-spinner text-info me-2"></i>In Progress</span>
                         <span class="fw-bold text-info">${stats.inProgressTasks || 0}</span>
                       </div>
                     </div>
                     <div class="text-center mt-3">
-                      <a href="/tasks" class="btn btn-sm btn-outline-primary" data-link="/tasks">Xem tất cả</a>
+                      <a href="/tasks" class="btn btn-sm btn-outline-primary" data-link="/tasks">View all</a>
                     </div>
                   </div>
                 </div>
@@ -212,7 +212,7 @@ function renderRecentTasks(tasks) {
               <i class="fas ${statusIcon} ${statusColor} fa-fw"></i>
             </div>
             <div class="flex-grow-1">
-              <h6 class="mb-1">${task.title || 'Công việc không có tiêu đề'}</h6>
+              <h6 class="mb-1">${task.title || 'Untitled task'}</h6>
               <small class="text-muted">
                 ${task.categoryId ? `<i class="fas ${task.categoryId.icon || 'fa-tag'} me-1"></i>${task.categoryId.name || 'N/A'}` : ''}
                 ${task.dueDate ? ` • <i class="fas fa-calendar me-1"></i>${formatDate(task.dueDate)}` : ''}
@@ -221,7 +221,7 @@ function renderRecentTasks(tasks) {
             </div>
           </div>
           <div class="d-flex align-items-center">
-            ${task.status === 'Completed' ? '<span class="badge bg-success me-2">Hoàn thành</span>' : ''}
+            ${task.status === 'Completed' ? '<span class="badge bg-success me-2">Completed</span>' : ''}
             <i class="fas fa-chevron-right text-muted"></i>
           </div>
         </div>

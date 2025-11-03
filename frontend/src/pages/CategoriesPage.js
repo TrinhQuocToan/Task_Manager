@@ -9,9 +9,9 @@ export async function renderCategoriesPage() {
     return `
       <div class="container-fluid py-4" style="margin-top: 0;">
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2><i class="fas fa-tags me-2"></i>Danh mục</h2>
+          <h2><i class="fas fa-tags me-2"></i>Categories</h2>
           <button class="btn btn-primary" onclick="showCategoryModal()">
-            <i class="fas fa-plus me-2"></i>Tạo danh mục mới
+            <i class="fas fa-plus me-2"></i>Create new category
           </button>
         </div>
 
@@ -27,7 +27,7 @@ export async function renderCategoriesPage() {
       <div class="container-fluid py-4" style="margin-top: 0;">
         <div class="alert alert-danger">
           <i class="fas fa-exclamation-triangle me-2"></i>
-          Không thể tải danh sách danh mục. Vui lòng thử lại.
+          Failed to load categories list. Please try again.
         </div>
       </div>
     `;
@@ -41,10 +41,10 @@ function renderEmptyState() {
         <div class="mb-4">
           <i class="fas fa-tags fa-4x text-muted"></i>
         </div>
-        <h4 class="mb-3">Chưa có danh mục nào</h4>
-        <p class="text-muted mb-4">Tạo danh mục đầu tiên để tổ chức công việc của bạn</p>
+        <h4 class="mb-3">No categories found</h4>
+        <p class="text-muted mb-4">Create your first category to organize your tasks</p>
         <button class="btn btn-primary btn-lg" onclick="showCategoryModal()">
-          <i class="fas fa-plus me-2"></i>Tạo danh mục mới
+          <i class="fas fa-plus me-2"></i>Create new category
         </button>
       </div>
     </div>
@@ -88,22 +88,22 @@ function renderCategoryModal() {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="categoryModalTitle">Tạo danh mục mới</h5>
+            <h5 class="modal-title" id="categoryModalTitle">Create new category</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <form id="category-form">
               <input type="hidden" id="category-id" name="id">
               <div class="mb-3">
-                <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                <label class="form-label">Category name <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="category-name" name="name" required>
               </div>
               <div class="mb-3">
-                <label class="form-label">Màu sắc</label>
+                <label class="form-label">Color</label>
                 <input type="color" class="form-control form-control-color" id="category-color" name="color" value="#198754">
               </div>
               <div class="mb-3">
-                <label class="form-label">Icon</label>
+                <label class="form-label">Category icon</label>
                 <select class="form-select" id="category-icon" name="icon">
                   <option value="fa-tag">Tag</option>
                   <option value="fa-briefcase">Briefcase</option>
@@ -118,8 +118,8 @@ function renderCategoryModal() {
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-            <button type="button" class="btn btn-primary" onclick="saveCategory()">Lưu</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="saveCategory()">Save</button>
           </div>
         </div>
       </div>
@@ -133,7 +133,7 @@ window.showCategoryModal = function() {
   document.getElementById('category-name').value = '';
   document.getElementById('category-color').value = '#198754';
   document.getElementById('category-icon').value = 'fa-tag';
-  document.getElementById('categoryModalTitle').textContent = 'Tạo danh mục mới';
+  document.getElementById('categoryModalTitle').textContent = 'Create new category';
   
   const modal = new bootstrap.Modal(document.getElementById('categoryModal'));
   modal.show();
@@ -144,7 +144,7 @@ window.editCategory = function(id, name, color, icon) {
   document.getElementById('category-name').value = name;
   document.getElementById('category-color').value = color || '#198754';
   document.getElementById('category-icon').value = icon || 'fa-tag';
-  document.getElementById('categoryModalTitle').textContent = 'Chỉnh sửa danh mục';
+  document.getElementById('categoryModalTitle').textContent = 'Edit category';
   
   const modal = new bootstrap.Modal(document.getElementById('categoryModal'));
   modal.show();
@@ -158,7 +158,7 @@ window.saveCategory = async function() {
   const icon = document.getElementById('category-icon').value;
 
   if (!name.trim()) {
-    showMessage('error', 'Vui lòng nhập tên danh mục');
+    showMessage('error', 'Please enter a category name');
     return;
   }
 
@@ -173,36 +173,36 @@ window.saveCategory = async function() {
     }
 
     if (response.success) {
-      showMessage('success', response.message || 'Lưu thành công!');
+      showMessage('success', response.message || 'Save successful!');
       const modal = bootstrap.Modal.getInstance(document.getElementById('categoryModal'));
       modal.hide();
       // Reload page
       window.location.reload();
     } else {
-      showMessage('error', response.message || 'Lưu thất bại');
+      showMessage('error', response.message || 'Save failed');
     }
   } catch (error) {
     console.error('Save category error:', error);
-    showMessage('error', 'Có lỗi xảy ra. Vui lòng thử lại.');
+    showMessage('error', 'An error occurred. Please try again.');
   }
 };
 
 window.deleteCategory = async function(categoryId) {
-  if (!confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
+  if (!confirm('Are you sure you want to delete this category?')) {
     return;
   }
 
   try {
     const response = await api.delete(`/api/categories/${categoryId}`);
     if (response.success) {
-      showMessage('success', 'Xóa danh mục thành công!');
+      showMessage('success', 'Category deleted successfully!');
       window.location.reload();
     } else {
-      showMessage('error', response.message || 'Xóa danh mục thất bại');
+      showMessage('error', response.message || 'Category deletion failed');
     }
   } catch (error) {
     console.error('Delete category error:', error);
-    showMessage('error', 'Xóa danh mục thất bại. Vui lòng thử lại.');
+      showMessage('error', 'Category deletion failed. Please try again.');
   }
 };
 

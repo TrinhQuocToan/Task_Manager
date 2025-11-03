@@ -33,12 +33,12 @@ export async function renderTasksPage() {
       <div class="container-fluid py-4" style="margin-top: 0;">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <div>
-            <h2><i class="fas fa-check-square me-2"></i>Công việc</h2>
+            <h2><i class="fas fa-check-square me-2"></i>Tasks</h2>
             ${searchQuery || statusFilter || priorityFilter || categoryFilter ? `
               <div class="mt-2">
                 <span class="badge bg-info">
                   <i class="fas fa-filter me-1"></i>
-                  Đang lọc (${tasks.length} kết quả)
+                  Filtering (${tasks.length} results)
                   <a href="/tasks" class="text-white ms-2" data-link="/tasks" style="text-decoration: none;">
                     <i class="fas fa-times"></i>
                   </a>
@@ -47,7 +47,7 @@ export async function renderTasksPage() {
             ` : ''}
           </div>
           <a href="/tasks/create" class="btn btn-primary" data-link="/tasks/create">
-            <i class="fas fa-plus me-2"></i>Tạo công việc mới
+            <i class="fas fa-plus me-2"></i>Create Task
           </a>
         </div>
 
@@ -62,7 +62,7 @@ export async function renderTasksPage() {
       <div class="container-fluid py-4" style="margin-top: 0;">
         <div class="alert alert-danger">
           <i class="fas fa-exclamation-triangle me-2"></i>
-          Không thể tải danh sách công việc. Vui lòng thử lại.
+          Failed to load tasks list. Please try again.
         </div>
       </div>
     `;
@@ -77,10 +77,10 @@ function renderEmptyState(searchQuery = '') {
           <div class="mb-4">
             <i class="fas fa-search fa-4x text-muted"></i>
           </div>
-          <h4 class="mb-3">Không tìm thấy kết quả</h4>
-          <p class="text-muted mb-4">Không có công việc nào phù hợp với từ khóa "${searchQuery}"</p>
+          <h4 class="mb-3">No results found</h4>
+          <p class="text-muted mb-4">No tasks found for keyword "${searchQuery}"</p>
           <a href="/tasks" class="btn btn-secondary" data-link="/tasks">
-            <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
+            <i class="fas fa-arrow-left me-2"></i>Go back to tasks list
           </a>
         </div>
       </div>
@@ -93,10 +93,10 @@ function renderEmptyState(searchQuery = '') {
         <div class="mb-4">
           <i class="fas fa-tasks fa-4x text-muted"></i>
         </div>
-        <h4 class="mb-3">Chưa có công việc nào</h4>
-        <p class="text-muted mb-4">Bắt đầu bằng cách tạo công việc đầu tiên của bạn</p>
+        <h4 class="mb-3">No tasks found</h4>
+        <p class="text-muted mb-4">Start by creating your first task</p>
         <a href="/tasks/create" class="btn btn-primary btn-lg" data-link="/tasks/create">
-          <i class="fas fa-plus me-2"></i>Tạo công việc mới
+          <i class="fas fa-plus me-2"></i>Create new task
         </a>
       </div>
     </div>
@@ -111,48 +111,56 @@ function renderFiltersAndSort(categories, filters) {
       <div class="card-body">
         <div class="row g-3">
           <div class="col-md-3">
-            <label class="form-label small text-muted"><i class="fas fa-filter me-1"></i>Lọc theo trạng thái</label>
-            <select class="form-select form-select-sm" id="statusFilter" onchange="applyFilters()">
-              <option value="">Tất cả</option>
-              <option value="Not Started" ${statusFilter === 'Not Started' ? 'selected' : ''}>Chưa bắt đầu</option>
-              <option value="In Progress" ${statusFilter === 'In Progress' ? 'selected' : ''}>Đang làm</option>
-              <option value="Completed" ${statusFilter === 'Completed' ? 'selected' : ''}>Hoàn thành</option>
-              <option value="Cancelled" ${statusFilter === 'Cancelled' ? 'selected' : ''}>Đã hủy</option>
+            <label class="form-label small text-muted"><i class="fas fa-filter me-1"></i>Filter by status</label>
+            <select class="form-select form-select-sm" id="statusFilter">
+              <option value="">All</option>
+              <option value="Not Started" ${statusFilter === 'Not Started' ? 'selected' : ''}>Not Started</option>
+              <option value="In Progress" ${statusFilter === 'In Progress' ? 'selected' : ''}>In Progress</option>
+              <option value="Completed" ${statusFilter === 'Completed' ? 'selected' : ''}>Completed</option>
+              <option value="Cancelled" ${statusFilter === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>
           </div>
           <div class="col-md-3">
-            <label class="form-label small text-muted"><i class="fas fa-flag me-1"></i>Lọc theo mức độ ưu tiên</label>
-            <select class="form-select form-select-sm" id="priorityFilter" onchange="applyFilters()">
-              <option value="">Tất cả</option>
-              <option value="Low" ${priorityFilter === 'Low' ? 'selected' : ''}>Thấp</option>
-              <option value="Medium" ${priorityFilter === 'Medium' ? 'selected' : ''}>Trung bình</option>
-              <option value="High" ${priorityFilter === 'High' ? 'selected' : ''}>Cao</option>
+            <label class="form-label small text-muted"><i class="fas fa-flag me-1"></i>Filter by priority</label>
+            <select class="form-select form-select-sm" id="priorityFilter">
+              <option value="">All</option>
+              <option value="Low" ${priorityFilter === 'Low' ? 'selected' : ''}>Low</option>
+              <option value="Medium" ${priorityFilter === 'Medium' ? 'selected' : ''}>Medium</option>
+              <option value="High" ${priorityFilter === 'High' ? 'selected' : ''}>High</option>
             </select>
           </div>
           <div class="col-md-3">
-            <label class="form-label small text-muted"><i class="fas fa-tag me-1"></i>Lọc theo danh mục</label>
-            <select class="form-select form-select-sm" id="categoryFilter" onchange="applyFilters()">
-              <option value="">Tất cả</option>
+            <label class="form-label small text-muted"><i class="fas fa-tag me-1"></i>Filter by category</label>
+            <select class="form-select form-select-sm" id="categoryFilter">
+              <option value="">All</option>
               ${categories.map(cat => `
                 <option value="${cat._id}" ${categoryFilter === cat._id ? 'selected' : ''}>${cat.name}</option>
               `).join('')}
             </select>
           </div>
           <div class="col-md-3">
-            <label class="form-label small text-muted"><i class="fas fa-sort me-1"></i>Sắp xếp</label>
-            <select class="form-select form-select-sm" id="sortBy" onchange="applyFilters()">
-              <option value="dueDate" ${sortBy === 'dueDate' ? 'selected' : ''}>Hạn chót</option>
-              <option value="createdAt" ${sortBy === 'createdAt' ? 'selected' : ''}>Ngày tạo</option>
-              <option value="priority" ${sortBy === 'priority' ? 'selected' : ''}>Mức ưu tiên</option>
-              <option value="title" ${sortBy === 'title' ? 'selected' : ''}>Tiêu đề</option>
+            <label class="form-label small text-muted"><i class="fas fa-sort me-1"></i>Sort by</label>
+            <select class="form-select form-select-sm" id="sortBy">
+              <option value="dueDate" ${sortBy === 'dueDate' ? 'selected' : ''}>Due date</option>
+              <option value="createdAt" ${sortBy === 'createdAt' ? 'selected' : ''}>Created at</option>
+              <option value="priority" ${sortBy === 'priority' ? 'selected' : ''}>Priority</option>
+              <option value="title" ${sortBy === 'title' ? 'selected' : ''}>Title</option>
             </select>
           </div>
           <div class="col-md-3">
-            <label class="form-label small text-muted"><i class="fas fa-sort-amount-down me-1"></i>Thứ tự</label>
-            <select class="form-select form-select-sm" id="sortOrder" onchange="applyFilters()">
-              <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Tăng dần</option>
-              <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Giảm dần</option>
+            <label class="form-label small text-muted"><i class="fas fa-sort-amount-down me-1"></i>Order</label>
+            <select class="form-select form-select-sm" id="sortOrder">
+              <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Ascending</option>
+              <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Descending</option>
             </select>
+          </div>
+          <div class="col-12 d-flex gap-2 justify-content-end mt-2">
+            <button class="btn btn-sm btn-primary" onclick="applyFilters()">
+              <i class="fas fa-filter me-1"></i>Apply filters
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="resetFilters()">
+              <i class="fas fa-undo me-1"></i>Reset
+            </button>
           </div>
         </div>
       </div>
@@ -181,19 +189,19 @@ function renderTasksList(tasks, sortBy, sortOrder) {
                 <thead>
                   <tr>
                     <th class="${getSortClass('title')}" style="cursor: pointer;" onclick="sortByColumn('title')">
-                      Tiêu đề <i class="fas ${getSortIcon('title')}"></i>
+                      Title <i class="fas ${getSortIcon('title')}"></i>
                     </th>
-                    <th>Danh mục</th>
+                    <th>Categories</th>
                     <th class="${getSortClass('priority')}" style="cursor: pointer;" onclick="sortByColumn('priority')">
-                      Mức độ ưu tiên <i class="fas ${getSortIcon('priority')}"></i>
+                      Priority <i class="fas ${getSortIcon('priority')}"></i>
                     </th>
                     <th class="${getSortClass('status')}" style="cursor: pointer;" onclick="sortByColumn('status')">
-                      Trạng thái <i class="fas ${getSortIcon('status')}"></i>
+                      Status <i class="fas ${getSortIcon('status')}"></i>
                     </th>
                     <th class="${getSortClass('dueDate')}" style="cursor: pointer;" onclick="sortByColumn('dueDate')">
-                      Hạn chót <i class="fas ${getSortIcon('dueDate')}"></i>
+                      Due date <i class="fas ${getSortIcon('dueDate')}"></i>
                     </th>
-                    <th>Thao tác</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -230,13 +238,19 @@ function renderTaskRow(task) {
         ` : '<span class="text-muted">N/A</span>'}
       </td>
       <td>
-        <span class="badge ${priorityClass}">${task.priority || 'Medium'}</span>
+        <select class="form-select form-select-sm select-priority ${getPrioritySelectClass(task.priority)}" onchange="updateTaskField('${task._id}','priority', this.value, this)">
+          <option value="Low" ${task.priority === 'Low' ? 'selected' : ''}>Low</option>
+          <option value="Medium" ${task.priority === 'Medium' ? 'selected' : ''}>Medium</option>
+          <option value="High" ${task.priority === 'High' ? 'selected' : ''}>High</option>
+        </select>
       </td>
       <td>
-        <span class="badge ${statusClass}">
-          <i class="fas ${statusIcon} me-1"></i>
-          ${task.status || 'Not Started'}
-        </span>
+        <select class="form-select form-select-sm select-status ${getStatusSelectClass(task.status)}" onchange="updateTaskField('${task._id}','status', this.value, this)">
+          <option value="Not Started" ${task.status === 'Not Started' ? 'selected' : ''}>Not Started</option>
+          <option value="In Progress" ${task.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+          <option value="Completed" ${task.status === 'Completed' ? 'selected' : ''}>Completed</option>
+          <option value="Cancelled" ${task.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+        </select>
       </td>
       <td>
         ${task.dueDate ? formatDateOnly(task.dueDate) : 'N/A'}
@@ -260,24 +274,44 @@ function renderTaskRow(task) {
 
 // Delete task function (will be called from onclick)
 window.deleteTask = async function(taskId) {
-  if (!confirm('Bạn có chắc chắn muốn xóa công việc này?')) {
+  if (!confirm('Are you sure you want to delete this task?')) {
     return;
   }
 
   try {
     const response = await api.delete(`/api/tasks/${taskId}`);
     if (response.success) {
-      showMessage('success', 'Xóa công việc thành công!');
+      showMessage('success', 'Task deleted successfully!');
       // Reload page
       window.location.reload();
     } else {
-      showMessage('error', response.message || 'Xóa công việc thất bại');
+      showMessage('error', response.message || 'Task deletion failed');
     }
   } catch (error) {
     console.error('Delete task error:', error);
-    showMessage('error', 'Xóa công việc thất bại. Vui lòng thử lại.');
+    showMessage('error', 'Task deletion failed. Please try again.');
   }
 };
+
+// Helpers to colorize selects
+function getStatusSelectClass(status) {
+  switch (status) {
+    case 'In Progress': return 'status-in-progress';
+    case 'Completed': return 'status-completed';
+    case 'Cancelled': return 'status-cancelled';
+    case 'Not Started':
+    default: return 'status-not-started';
+  }
+}
+
+function getPrioritySelectClass(priority) {
+  switch (priority) {
+    case 'High': return 'priority-high';
+    case 'Medium': return 'priority-medium';
+    case 'Low':
+    default: return 'priority-low';
+  }
+}
 
 function showMessage(type, message) {
   if (window.Toastify) {
@@ -317,6 +351,39 @@ window.applyFilters = function() {
     window.router.navigate(newUrl);
   } else {
     window.location.href = newUrl;
+  }
+};
+
+// Reset filters to defaults
+window.resetFilters = function() {
+  if (window.router) {
+    window.router.navigate('/tasks');
+  } else {
+    window.location.href = '/tasks';
+  }
+};
+
+// Inline update for single field (status/priority)
+window.updateTaskField = async function(taskId, field, value, el) {
+  try {
+    const payload = { [field]: value };
+    const response = await api.put(`/api/tasks/${taskId}`, payload);
+    if (response.success) {
+      showMessage('success', 'Update successful');
+      // Update color class
+      if (el) {
+        if (field === 'status') {
+          el.className = `form-select form-select-sm select-status ${getStatusSelectClass(value)}`;
+        } else if (field === 'priority') {
+          el.className = `form-select form-select-sm select-priority ${getPrioritySelectClass(value)}`;
+        }
+      }
+    } else {
+      showMessage('error', response.message || 'Update failed');
+    }
+  } catch (error) {
+    console.error('Update task field error:', error);
+    showMessage('error', 'Update failed. Please try again.');
   }
 };
 

@@ -19,7 +19,7 @@ export async function renderStatisticsPage() {
 
     return `
       <div class="container-fluid py-4" style="margin-top: 0;">
-        <h2 class="mb-4"><i class="fas fa-chart-line me-2"></i>Thống kê</h2>
+        <h2 class="mb-4"><i class="fas fa-chart-line me-2"></i>Statistics</h2>
         
         <div class="row mb-4">
           <div class="col-md-3 mb-3">
@@ -27,7 +27,7 @@ export async function renderStatisticsPage() {
               <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <h6 class="text-muted mb-2">Tổng công việc</h6>
+                    <h6 class="text-muted mb-2">Total tasks</h6>
                     <h3 class="mb-0">${totalTasks}</h3>
                   </div>
                   <div class="text-primary">
@@ -43,7 +43,7 @@ export async function renderStatisticsPage() {
               <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <h6 class="text-muted mb-2">Hoàn thành</h6>
+                    <h6 class="text-muted mb-2">Completed</h6>
                     <h3 class="mb-0 text-success">${completedTasks}</h3>
                   </div>
                   <div class="text-success">
@@ -59,7 +59,7 @@ export async function renderStatisticsPage() {
               <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <h6 class="text-muted mb-2">Đang làm</h6>
+                    <h6 class="text-muted mb-2">In Progress</h6>
                     <h3 class="mb-0 text-info">${inProgressTasks}</h3>
                   </div>
                   <div class="text-info">
@@ -75,7 +75,7 @@ export async function renderStatisticsPage() {
               <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <h6 class="text-muted mb-2">Ưu tiên cao</h6>
+                    <h6 class="text-muted mb-2">High priority</h6>
                     <h3 class="mb-0 text-danger">${stats.highPriorityTasks || 0}</h3>
                   </div>
                   <div class="text-danger">
@@ -91,11 +91,10 @@ export async function renderStatisticsPage() {
           <div class="col-md-6 mb-4">
             <div class="card border-0 shadow-sm">
               <div class="card-header bg-white">
-                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Biểu đồ tròn - Trạng thái</h5>
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Status - Pie chart</h5>
               </div>
               <div class="card-body">
-                <div id="statusPieChartContainer"></div>
-                <canvas id="statusPieChart" style="max-height: 300px; display: none;"></canvas>
+                <canvas id="statusPieChart" style="max-height: 300px;"></canvas>
               </div>
             </div>
           </div>
@@ -103,11 +102,10 @@ export async function renderStatisticsPage() {
           <div class="col-md-6 mb-4">
             <div class="card border-0 shadow-sm">
               <div class="card-header bg-white">
-                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Biểu đồ cột - Mức độ ưu tiên</h5>
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Priority - Bar chart</h5>
               </div>
               <div class="card-body">
-                <div id="priorityBarChartContainer"></div>
-                <canvas id="priorityBarChart" style="max-height: 300px; display: none;"></canvas>
+                <canvas id="priorityBarChart" style="max-height: 300px;"></canvas>
               </div>
             </div>
           </div>
@@ -117,12 +115,12 @@ export async function renderStatisticsPage() {
           <div class="col-md-6 mb-4">
             <div class="card border-0 shadow-sm">
               <div class="card-header bg-white">
-                <h5 class="mb-0">Tỷ lệ hoàn thành</h5>
+                <h5 class="mb-0">Completion rate</h5>
               </div>
               <div class="card-body">
                 <div class="mb-3">
                   <div class="d-flex justify-content-between mb-2">
-                    <span>Hoàn thành</span>
+                    <span>Completed</span>
                     <span>${totalTasks > 0 ? calculatePercentage(completedTasks, totalTasks) : 0}%</span>
                   </div>
                   <div class="progress" style="height: 25px;">
@@ -139,31 +137,31 @@ export async function renderStatisticsPage() {
           <div class="col-md-6 mb-4">
             <div class="card border-0 shadow-sm">
               <div class="card-header bg-white">
-                <h5 class="mb-0">Trạng thái công việc</h5>
+                <h5 class="mb-0">Task status</h5>
               </div>
               <div class="card-body">
                 <div class="mb-2">
                   <div class="d-flex justify-content-between mb-1">
-                    <span><i class="fas fa-circle text-secondary me-2"></i>Chưa bắt đầu</span>
+                    <span><i class="fas fa-circle text-secondary me-2"></i>Not Started</span>
                     <strong>${notStartedTasks}</strong>
                   </div>
                 </div>
                 <div class="mb-2">
                   <div class="d-flex justify-content-between mb-1">
-                    <span><i class="fas fa-spinner text-info me-2"></i>Đang làm</span>
+                    <span><i class="fas fa-spinner text-info me-2"></i>In Progress</span>
                     <strong>${inProgressTasks}</strong>
                   </div>
                 </div>
                 <div class="mb-2">
                   <div class="d-flex justify-content-between mb-1">
-                    <span><i class="fas fa-check-circle text-success me-2"></i>Hoàn thành</span>
+                    <span><i class="fas fa-check-circle text-success me-2"></i>Completed</span>
                     <strong>${completedTasks}</strong>
                   </div>
                 </div>
                 ${cancelledTasks > 0 ? `
                   <div class="mb-2">
                     <div class="d-flex justify-content-between mb-1">
-                      <span><i class="fas fa-times-circle text-danger me-2"></i>Đã hủy</span>
+                      <span><i class="fas fa-times-circle text-danger me-2"></i>Cancelled</span>
                       <strong>${cancelledTasks}</strong>
                     </div>
                   </div>
@@ -173,123 +171,6 @@ export async function renderStatisticsPage() {
           </div>
         </div>
       </div>
-
-      <script>
-        // Initialize charts after page render
-        (function() {
-          const stats = ${JSON.stringify(stats)};
-          const tasks = ${JSON.stringify(tasks)};
-          
-          // Count priorities
-          const priorityCounts = {
-            Low: tasks.filter(t => t.priority === 'Low').length,
-            Medium: tasks.filter(t => t.priority === 'Medium').length,
-            High: tasks.filter(t => t.priority === 'High').length
-          };
-          
-          // Status Pie Chart
-          const notStarted = ${notStartedTasks};
-          const inProgress = ${inProgressTasks};
-          const completed = ${completedTasks};
-          const cancelled = ${cancelledTasks};
-          const totalStatus = notStarted + inProgress + completed + cancelled;
-
-          // Pie Chart: trạng thái
-          const statusContainer = document.getElementById('statusPieChartContainer');
-          const statusCtx = document.getElementById('statusPieChart');
-          if (statusContainer && statusCtx) {
-            if (totalStatus === 0) {
-              statusCtx.style.display = 'none';
-              statusContainer.innerHTML = '<div class="text-center text-muted py-5">Không có dữ liệu</div>';
-            } else {
-              statusCtx.style.display = 'block';
-              statusContainer.innerHTML = '';
-              new Chart(statusCtx, {
-                type: 'pie',
-                data: {
-                  labels: ['Chưa bắt đầu', 'Đang làm', 'Hoàn thành', 'Đã hủy'],
-                  datasets: [{
-                    data: [
-                      notStarted,
-                      inProgress,
-                      completed,
-                      cancelled
-                    ],
-                    backgroundColor: [
-                      '#6c757d',
-                      '#0dcaf0',
-                      '#198754',
-                      '#dc3545'
-                    ]
-                  }]
-                },
-                options: {
-                  responsive: true,
-                  maintainAspectRatio: true,
-                  plugins: {
-                    legend: {
-                      position: 'bottom'
-                    }
-                  }
-                }
-              });
-            }
-          }
-          
-          // Priority Bar Chart
-          const priLow = priorityCounts.Low;
-          const priMed = priorityCounts.Medium;
-          const priHigh = priorityCounts.High;
-          const totalPrio = priLow + priMed + priHigh;
-          const priorityContainer = document.getElementById('priorityBarChartContainer');
-          const priorityCtx = document.getElementById('priorityBarChart');
-          if (priorityContainer && priorityCtx) {
-            if (totalPrio === 0) {
-              priorityCtx.style.display = 'none';
-              priorityContainer.innerHTML = '<div class="text-center text-muted py-5">Không có dữ liệu</div>';
-            } else {
-              priorityCtx.style.display = 'block';
-              priorityContainer.innerHTML = '';
-              new Chart(priorityCtx, {
-                type: 'bar',
-                data: {
-                  labels: ['Thấp', 'Trung bình', 'Cao'],
-                  datasets: [{
-                    label: 'Số lượng công việc',
-                    data: [
-                      priLow,
-                      priMed,
-                      priHigh
-                    ],
-                    backgroundColor: [
-                      '#198754',
-                      '#ffc107',
-                      '#dc3545'
-                    ]
-                  }]
-                },
-                options: {
-                  responsive: true,
-                  maintainAspectRatio: true,
-                  plugins: {
-                    legend: {
-                      display: false
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        stepSize: 1
-                      }
-                    }
-                  }
-                }
-              });
-            }
-          }
-        })();
-      </script>
     `;
   } catch (error) {
     console.error('Error rendering statistics:', error);
@@ -297,10 +178,93 @@ export async function renderStatisticsPage() {
       <div class="container-fluid py-4" style="margin-top: 0;">
         <div class="alert alert-danger">
           <i class="fas fa-exclamation-triangle me-2"></i>
-          Không thể tải thống kê. Vui lòng thử lại.
+          Failed to load statistics. Please try again.
         </div>
       </div>
     `;
+  }
+}
+
+// Initialize charts after the statistics page has been injected into the DOM
+export async function initStatisticsPage() {
+  try {
+    const [statsResponse, tasksResponse] = await Promise.all([
+      api.get('/api/tasks/statistics'),
+      api.get('/api/tasks')
+    ]);
+
+    const stats = statsResponse.data || {};
+    const tasks = tasksResponse.data?.tasks || [];
+
+    const notStartedTasks = stats.notStartedTasks || 0;
+    const inProgressTasks = stats.inProgressTasks || 0;
+    const completedTasks = stats.completedTasks || 0;
+    const cancelledTasks = stats.cancelledTasks || 0;
+
+    // Prepare or cleanup chart holders
+    window._tmCharts = window._tmCharts || {};
+    if (window._tmCharts.statusPie) {
+      try { window._tmCharts.statusPie.destroy(); } catch (_) {}
+    }
+    if (window._tmCharts.priorityBar) {
+      try { window._tmCharts.priorityBar.destroy(); } catch (_) {}
+    }
+
+    // Build counts for priorities
+    const priorityCounts = {
+      Low: tasks.filter(t => t.priority === 'Low').length,
+      Medium: tasks.filter(t => t.priority === 'Medium').length,
+      High: tasks.filter(t => t.priority === 'High').length
+    };
+
+    // Status Pie Chart
+    const statusCtx = document.getElementById('statusPieChart');
+    if (statusCtx && window.Chart) {
+      window._tmCharts.statusPie = new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+          labels: ['Not Started', 'In Progress', 'Completed', 'Cancelled'],
+          datasets: [{
+            data: [
+              notStartedTasks,
+              inProgressTasks,
+              completedTasks,
+              cancelledTasks
+            ],
+            backgroundColor: ['#6c757d', '#0dcaf0', '#198754', '#dc3545']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+
+    // Priority Bar Chart
+    const priorityCtx = document.getElementById('priorityBarChart');
+    if (priorityCtx && window.Chart) {
+      window._tmCharts.priorityBar = new Chart(priorityCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Low', 'Medium', 'High'],
+          datasets: [{
+            label: 'Tasks',
+            data: [priorityCounts.Low, priorityCounts.Medium, priorityCounts.High],
+            backgroundColor: ['#198754', '#ffc107', '#dc3545']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Init statistics page error:', error);
   }
 }
 

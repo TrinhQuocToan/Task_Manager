@@ -19,7 +19,7 @@ export function renderHeader(user = null) {
                 type="text" 
                 class="form-control search-input" 
                 id="searchInput"
-                placeholder="Tìm kiếm công việc..."
+                placeholder="Search tasks..."
                 autocomplete="off"
               >
               <button class="btn btn-outline-light" type="button" id="searchBtn">
@@ -56,23 +56,23 @@ export function renderHeader(user = null) {
             <ul class="dropdown-menu dropdown-menu-end">
               <li>
                 <a class="dropdown-item" href="/me/profile" data-link="/me/profile">
-                  <i class="fas fa-user me-2"></i>Hồ sơ
+                  <i class="fas fa-user me-2"></i>Profile
                 </a>
               </li>
               <li><hr class="dropdown-divider"></li>
               <li>
                 <a class="dropdown-item" href="/auth/logout" data-link="/auth/logout">
-                  <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                  <i class="fas fa-sign-out-alt me-2"></i>Logout
                 </a>
               </li>
             </ul>
           </div>
         ` : `
           <a class="nav-link" href="/auth/login" data-link="/auth/login">
-            <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập
+            <i class="fas fa-sign-in-alt me-1"></i>Login
           </a>
           <a class="nav-link" href="/auth/register" data-link="/auth/register">
-            <i class="fas fa-user-plus me-1"></i>Đăng ký
+            <i class="fas fa-user-plus me-1"></i>Register
           </a>
         `}
       </div>

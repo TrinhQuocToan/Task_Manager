@@ -244,6 +244,12 @@ document.addEventListener('DOMContentLoaded', () => {
     await renderPage(content, true);
   });
 
+  router.route('/tasks/:id', async (params) => {
+    const { renderTaskDetailPage } = await import('./pages/TaskDetailPage.js');
+    const content = await renderTaskDetailPage(params.id);
+    await renderPage(content, true);
+  });
+
   // Categories route
   router.route('/categories', async () => {
     const content = await renderCategoriesPage();
@@ -257,9 +263,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Statistics route
   router.route('/statistics', async () => {
-    const { renderStatisticsPage } = await import('./pages/StatisticsPage.js');
+    const { renderStatisticsPage, initStatisticsPage } = await import('./pages/StatisticsPage.js');
     const content = await renderStatisticsPage();
     await renderPage(content, true);
+    // Initialize charts after DOM is updated
+    await initStatisticsPage();
   });
 
   router.route('/me/profile', async () => {

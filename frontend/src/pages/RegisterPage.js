@@ -7,24 +7,24 @@ export function renderRegisterPage() {
       <div class="row w-100 mx-0">
         <div class="col-md-6 welcome-section">
           <h1 class="welcome-text">
-            Bắt đầu quản lý công việc!
-            <span>Tham gia cùng chúng tôi ngay hôm nay</span>
+            Start managing tasks today!
+            <span>Join us now</span>
           </h1>
         </div>
         
         <div class="col-md-6 form-section">
           <div class="login-form">
-            <h2 class="mb-4">Đăng ký</h2>
-            <p class="text-muted mb-4">Tạo tài khoản mới để bắt đầu quản lý công việc của bạn.</p>
+            <h2 class="mb-4">Register</h2>
+            <p class="text-muted mb-4">Create a new account to start managing your tasks.</p>
 
             <div id="register-messages"></div>
 
             <form id="register-form">
               <div class="mb-3">
                 <label class="form-label">
-                  <i class="fas fa-user me-2"></i>Tên đăng nhập
+                  <i class="fas fa-user me-2"></i>Username
                 </label>
-                <input type="text" class="form-control" name="username" placeholder="Tên đăng nhập" required>
+                <input type="text" class="form-control" name="username" placeholder="Username" required>
               </div>
 
               <div class="mb-3">
@@ -36,26 +36,26 @@ export function renderRegisterPage() {
 
               <div class="mb-3">
                 <label class="form-label">
-                  <i class="fas fa-lock me-2"></i>Mật khẩu
+                  <i class="fas fa-lock me-2"></i>Password
                 </label>
-                <input type="password" class="form-control" name="password" placeholder="Mật khẩu" required>
+                <input type="password" class="form-control" name="password" placeholder="Password" required>
               </div>
 
               <div class="mb-3">
                 <label class="form-label">
-                  <i class="fas fa-lock me-2"></i>Xác nhận mật khẩu
+                  <i class="fas fa-lock me-2"></i>Confirm password
                 </label>
-                <input type="password" class="form-control" name="confirmPassword" placeholder="Xác nhận mật khẩu" required>
+                <input type="password" class="form-control" name="confirmPassword" placeholder="Confirm password" required>
               </div>
 
               <button type="submit" class="btn btn-primary w-100 mb-3" id="register-btn">
                 <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
-                Đăng ký
+                Register
               </button>
 
               <div class="mt-4 text-center">
-                <span class="me-2">Đã có tài khoản?</span>
-                <a href="/auth/login" class="text-primary" data-link="/auth/login">Đăng nhập ngay</a>
+                <span class="me-2">Already have an account?</span>
+                <a href="/auth/login" class="text-primary" data-link="/auth/login">Login now</a>
               </div>
             </form>
           </div>
@@ -86,7 +86,7 @@ export function initRegisterPage() {
 
       // Client-side validation
       if (password !== confirmPassword) {
-        showMessage('error', 'Mật khẩu xác nhận không khớp');
+        showMessage('error', 'Passwords do not match');
         if (registerBtn) {
           registerBtn.disabled = false;
           if (spinner) spinner.classList.add('d-none');
@@ -95,7 +95,7 @@ export function initRegisterPage() {
       }
 
       if (password.length < 6) {
-        showMessage('error', 'Mật khẩu phải có ít nhất 6 ký tự');
+        showMessage('error', 'Password must be at least 6 characters');
         if (registerBtn) {
           registerBtn.disabled = false;
           if (spinner) spinner.classList.add('d-none');
@@ -119,7 +119,7 @@ export function initRegisterPage() {
             auth.setToken(response.data.token);
           }
           
-          showMessage('success', response.message || 'Đăng ký thành công! Đang chuyển hướng...');
+          showMessage('success', response.message || 'Registration successful! Redirecting...');
           
           setTimeout(() => {
             // If token exists, go to home, otherwise go to login
@@ -130,7 +130,7 @@ export function initRegisterPage() {
             }
           }, 1500);
         } else {
-          showMessage('error', response.message || 'Đăng ký thất bại');
+          showMessage('error', response.message || 'Registration failed');
           
           // Re-enable button
           if (registerBtn) {
@@ -140,7 +140,7 @@ export function initRegisterPage() {
         }
       } catch (error) {
         console.error('Register error:', error);
-        showMessage('error', 'Đăng ký thất bại. Vui lòng thử lại.');
+        showMessage('error', 'Registration failed. Please try again.');
         
         // Re-enable button
         if (registerBtn) {

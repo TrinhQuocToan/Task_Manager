@@ -7,43 +7,43 @@ export function renderLoginPage() {
       <div class="row w-100 mx-0">
         <div class="col-md-6 welcome-section">
           <h1 class="welcome-text">
-            Chào mừng quay trở lại!
-            <span>Quản lý công việc của bạn hiệu quả hơn</span>
+            Welcome back!
+            <span>Manage your tasks more efficiently</span>
           </h1>
         </div>
         
         <div class="col-md-6 form-section">
           <div class="login-form">
-            <h2 class="mb-4">Đăng nhập</h2>
-            <p class="text-muted mb-4">Đăng nhập vào tài khoản của bạn để tiếp tục sử dụng các tính năng mới.</p>
+            <h2 class="mb-4">Login</h2>
+            <p class="text-muted mb-4">Sign in to your account to continue.</p>
 
             <div id="login-messages"></div>
 
             <form id="login-form">
               <div class="mb-3">
                 <label class="form-label">
-                  <i class="fas fa-user me-2"></i>Tên đăng nhập
+                  <i class="fas fa-user me-2"></i>Username
                 </label>
-                <input type="text" class="form-control" name="username" placeholder="Tên đăng nhập" required>
+                <input type="text" class="form-control" name="username" placeholder="Username" required>
               </div>
 
               <div class="mb-3">
                 <label class="form-label">
-                  <i class="fas fa-lock me-2"></i>Mật khẩu
+                  <i class="fas fa-lock me-2"></i>Password
                 </label>
-                <input type="password" class="form-control" name="password" placeholder="Mật khẩu" required>
+                <input type="password" class="form-control" name="password" placeholder="Password" required>
               </div>
 
               <button type="submit" class="btn btn-primary w-100 mb-3" id="login-btn">
                 <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
-                Đăng nhập
+                Login
               </button>
 
               <div class="mt-4 text-center">
-                <span class="me-2">Bạn chưa có tài khoản?</span>
-                <a href="/auth/register" class="text-primary" data-link="/auth/register">Tạo Tài Khoản Ngay</a>
+                <span class="me-2">Don't have an account?</span>
+                <a href="/auth/register" class="text-primary" data-link="/auth/register">Create one</a>
                 <span class="mx-2">·</span>
-                <a href="/auth/forgot-password" class="text-primary" data-link="/auth/forgot-password">Quên mật khẩu?</a>
+                <a href="/auth/forgot-password" class="text-primary" data-link="/auth/forgot-password">Forgot password?</a>
               </div>
             </form>
           </div>
@@ -83,14 +83,14 @@ export function initLoginPage() {
             auth.setToken(response.data.token);
           }
           
-          showMessage('success', response.message || 'Đăng nhập thành công!');
+          showMessage('success', response.message || 'Login successful!');
           
           // Redirect to home after short delay
           setTimeout(() => {
             window.location.href = '/';
           }, 500);
         } else {
-          showMessage('error', response.message || 'Đăng nhập thất bại');
+          showMessage('error', response.message || 'Login failed');
           
           // Re-enable button
           if (loginBtn) {
@@ -100,7 +100,7 @@ export function initLoginPage() {
         }
       } catch (error) {
         console.error('Login error:', error);
-        showMessage('error', 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
+        showMessage('error', 'Login failed. Please check your credentials.');
         
         // Re-enable button
         if (loginBtn) {

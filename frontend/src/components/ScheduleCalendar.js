@@ -5,7 +5,7 @@ export function renderScheduleCalendar(tasks) {
     return `
       <div class="text-center py-4">
         <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-        <p class="text-muted">Chưa có công việc nào trong tuần này</p>
+        <p class="text-muted">No tasks this week</p>
       </div>
     `;
   }
@@ -21,13 +21,13 @@ export function renderScheduleCalendar(tasks) {
       <div class="calendar-header mb-3">
         <div class="d-flex justify-content-between align-items-center">
           <h5 class="mb-0">
-            <i class="fas fa-calendar-alt me-2"></i>Lịch trình tuần này
+            <i class="fas fa-calendar-alt me-2"></i>This week's schedule
           </h5>
           <div class="calendar-nav">
             <button class="btn btn-sm btn-outline-secondary" onclick="navigateWeek(-1)">
               <i class="fas fa-chevron-left"></i>
             </button>
-            <span class="mx-2">Tuần ${getWeekNumber(new Date())}</span>
+            <span class="mx-2">Week ${getWeekNumber(new Date())}</span>
             <button class="btn btn-sm btn-outline-secondary" onclick="navigateWeek(1)">
               <i class="fas fa-chevron-right"></i>
             </button>
@@ -87,9 +87,9 @@ function getWeekNumber(date) {
 
 function renderDayColumn(dateKey, tasks) {
   const date = new Date(dateKey);
-  const dayName = date.toLocaleDateString('vi-VN', { weekday: 'short' });
+  const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
   const dayNumber = date.getDate();
-  const month = date.toLocaleDateString('vi-VN', { month: 'short' });
+  const month = date.toLocaleDateString('en-US', { month: 'short' });
   const isToday = formatDateOnly(new Date().toISOString()) === dateKey;
   
   // Sort tasks by priority and status
@@ -109,16 +109,16 @@ function renderDayColumn(dateKey, tasks) {
         <div class="day-name">${dayName}</div>
         <div class="day-number ${isToday ? 'today-badge' : ''}">${dayNumber}</div>
         <div class="day-month">${month}</div>
-        <div class="day-count">${tasks.length} công việc</div>
+        <div class="day-count">${tasks.length} task${tasks.length === 1 ? '' : 's'}</div>
       </div>
       <div class="day-tasks">
         ${sortedTasks.length > 0 
           ? sortedTasks.slice(0, 4).map(task => renderTaskCard(task)).join('')
-          : '<div class="no-tasks text-muted text-center py-2"><small>Không có công việc</small></div>'
+          : '<div class="no-tasks text-muted text-center py-2"><small>No tasks</small></div>'
         }
         ${sortedTasks.length > 4 ? `
           <div class="more-tasks text-center">
-            <small class="text-muted">+${sortedTasks.length - 4} công việc khác</small>
+            <small class="text-muted">+${sortedTasks.length - 4} more task${(sortedTasks.length - 4) === 1 ? '' : 's'}</small>
           </div>
         ` : ''}
       </div>

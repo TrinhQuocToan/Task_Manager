@@ -24,7 +24,7 @@ export async function renderTaskFormPage(taskId = null) {
               <div class="card-header bg-white">
                 <h4 class="mb-0">
                   <i class="fas ${isEdit ? 'fa-edit' : 'fa-plus'} me-2"></i>
-                  ${isEdit ? 'Chỉnh sửa công việc' : 'Tạo công việc mới'}
+                  ${isEdit ? 'Edit task' : 'Create new task'}
                 </h4>
               </div>
               <div class="card-body">
@@ -41,7 +41,7 @@ export async function renderTaskFormPage(taskId = null) {
       <div class="container-fluid py-4" style="margin-top: 0;">
         <div class="alert alert-danger">
           <i class="fas fa-exclamation-triangle me-2"></i>
-          ${error.message || 'Không thể tải form. Vui lòng thử lại.'}
+          ${error.message || 'Failed to load form. Please try again.'}
         </div>
       </div>
     `;
@@ -68,37 +68,37 @@ function renderTaskForm(task, categories, isEdit) {
     <form id="task-form">
       <div class="mb-3">
         <label class="form-label">
-          <i class="fas fa-heading me-2"></i>Tiêu đề <span class="text-danger">*</span>
+          <i class="fas fa-heading me-2"></i>Title <span class="text-danger">*</span>
         </label>
         <input 
           type="text" 
           class="form-control" 
           name="title" 
           value="${task?.title || ''}"
-          placeholder="Nhập tiêu đề công việc"
+          placeholder="Enter task title"
           required
         >
       </div>
 
       <div class="mb-3">
         <label class="form-label">
-          <i class="fas fa-align-left me-2"></i>Mô tả
+          <i class="fas fa-align-left me-2"></i>Description
         </label>
         <textarea 
           class="form-control" 
           name="description" 
           rows="3"
-          placeholder="Nhập mô tả chi tiết về công việc"
+          placeholder="Enter detailed description of the task"
         >${task?.description || ''}</textarea>
       </div>
 
       <div class="row">
         <div class="col-md-6 mb-3">
           <label class="form-label">
-            <i class="fas fa-tags me-2"></i>Danh mục <span class="text-danger">*</span>
+            <i class="fas fa-tags me-2"></i>Category <span class="text-danger">*</span>
           </label>
           <select class="form-select" name="categoryId" required>
-            <option value="">Chọn danh mục</option>
+            <option value="">Select category</option>
             ${categories.map(cat => `
               <option value="${cat._id}" ${task?.categoryId?._id === cat._id || task?.categoryId === cat._id ? 'selected' : ''}>
                 ${cat.name}
@@ -109,7 +109,7 @@ function renderTaskForm(task, categories, isEdit) {
 
         <div class="col-md-6 mb-3">
           <label class="form-label">
-            <i class="fas fa-flag me-2"></i>Mức độ ưu tiên
+            <i class="fas fa-flag me-2"></i>Priority
           </label>
           <select class="form-select" name="priority">
             ${priorityOptions.map(priority => `
@@ -124,7 +124,7 @@ function renderTaskForm(task, categories, isEdit) {
       <div class="row">
         <div class="col-md-6 mb-3">
           <label class="form-label">
-            <i class="fas fa-info-circle me-2"></i>Trạng thái
+            <i class="fas fa-info-circle me-2"></i>Status
           </label>
           <select class="form-select" name="status">
             ${statusOptions.map(status => `
@@ -137,7 +137,7 @@ function renderTaskForm(task, categories, isEdit) {
 
         <div class="col-md-6 mb-3">
           <label class="form-label">
-            <i class="fas fa-calendar-alt me-2"></i>Hạn chót <span class="text-danger">*</span>
+            <i class="fas fa-calendar-alt me-2"></i>Deadline <span class="text-danger">*</span>
           </label>
           <input 
             type="datetime-local" 
@@ -151,7 +151,7 @@ function renderTaskForm(task, categories, isEdit) {
 
       <div class="mb-3">
         <label class="form-label">
-          <i class="fas fa-bell me-2"></i>Nhắc nhở
+          <i class="fas fa-bell me-2"></i>Reminder
         </label>
         <input 
           type="datetime-local" 
@@ -163,11 +163,11 @@ function renderTaskForm(task, categories, isEdit) {
 
       <div class="d-flex justify-content-between">
         <a href="/tasks" class="btn btn-secondary" data-link="/tasks">
-          <i class="fas fa-times me-2"></i>Hủy
+          <i class="fas fa-times me-2"></i>Cancel
         </a>
         <button type="submit" class="btn btn-primary" id="submit-btn">
           <span class="spinner-border spinner-border-sm d-none me-2" role="status"></span>
-          <i class="fas fa-save me-2"></i>${isEdit ? 'Cập nhật' : 'Tạo mới'}
+          <i class="fas fa-save me-2"></i>${isEdit ? 'Update' : 'Create new'}
         </button>
       </div>
     </form>
@@ -216,12 +216,12 @@ export function initTaskFormPage(taskId = null) {
       }
 
       if (response.success) {
-        showMessage('success', response.message || (taskId ? 'Cập nhật thành công!' : 'Tạo công việc thành công!'));
+        showMessage('success', response.message || (taskId ? 'Update successful!' : 'Task created successfully!'));
         setTimeout(() => {
           router.navigate('/tasks');
         }, 1000);
       } else {
-        showMessage('error', response.message || 'Thao tác thất bại');
+        showMessage('error', response.message || 'Operation failed');
         if (submitBtn) {
           submitBtn.disabled = false;
           if (spinner) spinner.classList.add('d-none');
@@ -229,7 +229,7 @@ export function initTaskFormPage(taskId = null) {
       }
     } catch (error) {
       console.error('Task form error:', error);
-      showMessage('error', error.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+        showMessage('error', error.message || 'An error occurred. Please try again.');
       if (submitBtn) {
         submitBtn.disabled = false;
         if (spinner) spinner.classList.add('d-none');
