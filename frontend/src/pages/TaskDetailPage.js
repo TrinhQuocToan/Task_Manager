@@ -1,5 +1,5 @@
 import { api } from '../main.js';
-import { formatDate, formatDateOnly, getStatusBadgeClass, getPriorityBadgeClass, getStatusIcon } from '../utils/format.js';
+import { formatDate, formatDateOnly, getStatusBadgeClass, getPriorityBadgeClass, getStatusIcon, isTaskOverdue, getOverdueBadgeText, wasCompletedLate, getCompletedLateBadgeText } from '../utils/format.js';
 
 export async function renderTaskDetailPage(taskId) {
   try {
@@ -24,9 +24,18 @@ export async function renderTaskDetailPage(taskId) {
     const statusClass = getStatusBadgeClass(task.status);
     const priorityClass = getPriorityBadgeClass(task.priority);
     const statusIcon = getStatusIcon(task.status);
+    const isOverdue = isTaskOverdue(task);
+    const overdueBadge = isOverdue ? getOverdueBadgeText(task) : '';
     
     return `
       <div class="container-fluid py-4" style="margin-top: 0;">
+        ${isOverdue ? `
+          <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Overdue Alert:</strong> This task is <strong>${overdueBadge}</strong>!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        ` : ''}
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
           <div>
@@ -58,9 +67,19 @@ export async function renderTaskDetailPage(taskId) {
                       <label class="text-muted small d-block mb-1">
                         <i class="fas fa-info-circle me-1"></i>Status
                       </label>
-                      <span class="badge ${statusClass} fs-6">
-                        <i class="${statusIcon} me-1"></i>${task.status}
-                      </span>
+                      <div>
+                        <span class="badge ${statusClass} fs-6">
+                          <i class="${statusIcon} me-1"></i>${task.status}
+                        </span>
+                        ${(() => {
+                          const lateBadge = getCompletedLateBadgeText(task);
+                          return lateBadge ? `
+                            <span class="badge bg-warning text-dark fs-6 ms-2">
+                              <i class="fas fa-clock me-1"></i>${lateBadge}
+                            </span>
+                          ` : '';
+                        })()}
+                      </div>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -87,7 +106,7 @@ export async function renderTaskDetailPage(taskId) {
                     <label class="text-muted small d-block mb-1">
                       <i class="fas fa-tag me-1"></i>Category
                     </label>
-                    <span class="badge fs-6" style="background-color: ${task.categoryId.color || '#198754'};">
+                    <span class="badge fs-6" style="background-color: ${task.categoryId.color || '#d86b22'};">
                       <i class="fas ${task.categoryId.icon || 'fa-tag'} me-1"></i>
                       ${task.categoryId.name || 'N/A'}
                     </span>
@@ -179,7 +198,9 @@ window.deleteTaskAndRedirect = async function(taskId) {
 };
 
 function showMessage(type, message) {
-  if (window.Toastify) {
+  // eslint-disable-next-line no-undef
+  if (typeof Toastify !== 'undefined') {
+    // eslint-disable-next-line no-undef
     Toastify({
       text: message,
       duration: 3000,

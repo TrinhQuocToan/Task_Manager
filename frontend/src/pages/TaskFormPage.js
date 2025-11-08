@@ -1,5 +1,6 @@
 import { api } from '../main.js';
 import router from '../router/index.js';
+import { isTaskOverdue, getOverdueBadgeText, getCompletionDelayMessage } from '../utils/format.js';
 
 export async function renderTaskFormPage(taskId = null) {
   try {
@@ -51,6 +52,8 @@ export async function renderTaskFormPage(taskId = null) {
 function renderTaskForm(task, categories, isEdit) {
   const priorityOptions = ['Low', 'Medium', 'High'];
   const statusOptions = ['Not Started', 'In Progress', 'Completed', 'Cancelled'];
+  const isOverdue = task && isTaskOverdue(task);
+  const overdueBadge = isOverdue ? getOverdueBadgeText(task) : '';
 
   // Format date for input (YYYY-MM-DDTHH:mm)
   const formatDateForInput = (dateString) => {
@@ -65,6 +68,13 @@ function renderTaskForm(task, categories, isEdit) {
   };
 
   return `
+    ${isOverdue ? `
+      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Warning:</strong> This task is <strong>${overdueBadge}</strong>. Please update the status or extend the deadline.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    ` : ''}
     <form id="task-form">
       <div class="mb-3">
         <label class="form-label">
@@ -161,7 +171,7 @@ function renderTaskForm(task, categories, isEdit) {
         >
       </div>
 
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-between align-items-center">
         <a href="/tasks" class="btn btn-secondary" data-link="/tasks">
           <i class="fas fa-times me-2"></i>Cancel
         </a>
@@ -216,10 +226,18 @@ export function initTaskFormPage(taskId = null) {
       }
 
       if (response.success) {
-        showMessage('success', response.message || (taskId ? 'Update successful!' : 'Task created successfully!'));
+        // Check if task is being marked as completed
+        let message = response.message || (taskId ? 'Update successful!' : 'Task created successfully!');
+        
+        if (data.status === 'Completed' && data.dueDate) {
+          const delayMessage = getCompletionDelayMessage(data.dueDate);
+          message = delayMessage + ' ' + message;
+        }
+        
+        showMessage('success', message);
         setTimeout(() => {
           router.navigate('/tasks');
-        }, 1000);
+        }, 2000); // Give more time to read the completion delay message
       } else {
         showMessage('error', response.message || 'Operation failed');
         if (submitBtn) {
@@ -239,7 +257,9 @@ export function initTaskFormPage(taskId = null) {
 }
 
 function showMessage(type, message) {
-  if (window.Toastify) {
+  // eslint-disable-next-line no-undef
+  if (typeof Toastify !== 'undefined') {
+    // eslint-disable-next-line no-undef
     Toastify({
       text: message,
       duration: 3000,

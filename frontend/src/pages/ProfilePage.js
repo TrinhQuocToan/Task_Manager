@@ -1,5 +1,4 @@
 import { api, getCurrentUser } from '../main.js';
-import router from '../router/index.js';
 
 export async function renderProfilePage() {
   try {
@@ -52,10 +51,10 @@ function renderProfileForm(user) {
             alt="Avatar" 
             class="rounded-circle" 
             id="avatar-preview"
-            style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #198754;"
+            style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #d86b22;"
             onerror="this.src='https://secure.gravatar.com/avatar/default?s=120&d=mp'"
           >
-          <label for="avatar-input" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" style="width: 36px; height: 36px; cursor: pointer;">
+          <label for="avatar-input" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" style="width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
             <i class="fas fa-camera"></i>
           </label>
           <input type="file" id="avatar-input" accept="image/*" style="display: none;">
@@ -117,7 +116,7 @@ function renderProfileForm(user) {
         </button>
       </div>
 
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-between align-items-center">
         <a href="/" class="btn btn-secondary" data-link="/">
           <i class="fas fa-times me-2"></i>Cancel
         </a>
@@ -216,7 +215,7 @@ function renderProfileForm(user) {
               </div>
             </form>
           </div>
-          <div class="modal-footer">
+          <div class="modal-footer align-items-center">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               <i class="fas fa-times me-2"></i>Cancel
             </button>
@@ -381,7 +380,9 @@ export function initProfilePage() {
             if (window.bootstrap) {
               modalInstance = window.bootstrap.Modal.getInstance(changePasswordModal);
             }
+            // eslint-disable-next-line no-undef
             if (!modalInstance && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+              // eslint-disable-next-line no-undef
               modalInstance = bootstrap.Modal.getInstance(changePasswordModal);
             }
             
@@ -417,7 +418,9 @@ export function initProfilePage() {
 }
 
 function showMessage(type, message) {
-  if (window.Toastify) {
+  // eslint-disable-next-line no-undef
+  if (typeof Toastify !== 'undefined') {
+    // eslint-disable-next-line no-undef
     Toastify({
       text: message,
       duration: 3000,

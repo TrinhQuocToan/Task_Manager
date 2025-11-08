@@ -8,7 +8,7 @@ const { checkCategoryExists } = require('./categoryController');
 // @access  Private
 exports.getTasks = async (req, res) => {
     try {
-        const { status, categoryId, priority, search, sortBy = 'dueDate', sortOrder = 'asc' } = req.query;
+        const { status, categoryId, priority, search, sortBy = 'dueDate', sortOrder = 'asc', startDate, endDate } = req.query;
         const userId = req.userId;
 
         // Build query
@@ -16,6 +16,19 @@ exports.getTasks = async (req, res) => {
         if (status) query.status = status;
         if (categoryId) query.categoryId = categoryId;
         if (priority) query.priority = priority;
+
+        // Add date range filter if provided
+        if (startDate || endDate) {
+            query.createdAt = {};
+            if (startDate) {
+                query.createdAt.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                const endDateTime = new Date(endDate);
+                endDateTime.setHours(23, 59, 59, 999);
+                query.createdAt.$lte = endDateTime;
+            }
+        }
 
         // Build sort
         const sort = {};
@@ -268,12 +281,12 @@ exports.updateTask = async (req, res) => {
     }
 };
 
-// @desc    Delete task
+// @desc    Delete task (soft delete)
 // @route   DELETE /api/tasks/:id
 // @access  Private
 exports.deleteTask = async (req, res) => {
     try {
-        const task = await Task.findOneAndDelete({
+        const task = await Task.findOne({
             _id: req.params.id,
             userId: req.userId
         });
@@ -284,6 +297,11 @@ exports.deleteTask = async (req, res) => {
                 message: 'Task not found'
             });
         }
+
+        // Soft delete: mark as deleted
+        task.deleted = true;
+        task.deletedAt = new Date();
+        await task.save();
 
         res.json({
             success: true,
@@ -307,20 +325,91 @@ exports.deleteTask = async (req, res) => {
     }
 };
 
+// @desc    Restore deleted task
+// @route   PUT /api/tasks/:id/restore
+// @access  Private
+exports.restoreTask = async (req, res) => {
+    try {
+        // Explicitly allow finding deleted tasks
+        const task = await Task.findOne({
+            _id: req.params.id,
+            userId: req.userId,
+            deleted: true
+        });
+
+        if (!task) {
+            return res.status(404).json({
+                success: false,
+                message: 'Deleted task not found'
+            });
+        }
+
+        // Restore task
+        task.deleted = false;
+        task.deletedAt = null;
+        await task.save();
+
+        await task.populate('categoryId', 'name color icon');
+
+        res.json({
+            success: true,
+            message: 'Task restored successfully',
+            data: { task }
+        });
+    } catch (error) {
+        console.error('Restore task error:', error);
+        
+        if (error.kind === 'ObjectId') {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid task ID'
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Server error during task restoration'
+        });
+    }
+};
+
 // @desc    Get task statistics
-// @route   GET /api/tasks/statistics
+// @route   GET /api/tasks/statistics?categoryId=xxx&startDate=xxx&endDate=xxx
 // @access  Private
 exports.getTaskStatistics = async (req, res) => {
     try {
         const userId = req.userId;
+        const { categoryId, startDate, endDate } = req.query;
 
         // Convert userId to ObjectId if it's a string
         const userIdObject = typeof userId === 'string' 
             ? new mongoose.Types.ObjectId(userId) 
             : userId;
 
+        // Build match query
+        const matchQuery = { userId: userIdObject };
+
+        // Add category filter if provided
+        if (categoryId) {
+            matchQuery.categoryId = new mongoose.Types.ObjectId(categoryId);
+        }
+
+        // Add date range filter if provided
+        if (startDate || endDate) {
+            matchQuery.createdAt = {};
+            if (startDate) {
+                matchQuery.createdAt.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                const endDateTime = new Date(endDate);
+                endDateTime.setHours(23, 59, 59, 999); // Include entire end date
+                matchQuery.createdAt.$lte = endDateTime;
+            }
+        }
+
+        // Include all tasks (even deleted ones) for accurate statistics
         const stats = await Task.aggregate([
-            { $match: { userId: userIdObject } },
+            { $match: matchQuery },
             {
                 $group: {
                     _id: null,
@@ -339,6 +428,25 @@ exports.getTaskStatistics = async (req, res) => {
                     },
                     highPriorityTasks: {
                         $sum: { $cond: [{ $eq: ['$priority', 'High'] }, 1, 0] }
+                    },
+                    overdueTasks: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $and: [
+                                        { $lt: ['$dueDate', new Date()] },
+                                        { $ne: ['$status', 'Completed'] },
+                                        { $ne: ['$status', 'Cancelled'] },
+                                        { $ne: ['$deleted', true] } // Exclude deleted from overdue
+                                    ]
+                                },
+                                1,
+                                0
+                            ]
+                        }
+                    },
+                    deletedTasks: {
+                        $sum: { $cond: [{ $eq: ['$deleted', true] }, 1, 0] }
                     }
                 }
             }
@@ -350,7 +458,9 @@ exports.getTaskStatistics = async (req, res) => {
             inProgressTasks: 0,
             notStartedTasks: 0,
             cancelledTasks: 0,
-            highPriorityTasks: 0
+            highPriorityTasks: 0,
+            overdueTasks: 0,
+            deletedTasks: 0
         };
 
         res.json({

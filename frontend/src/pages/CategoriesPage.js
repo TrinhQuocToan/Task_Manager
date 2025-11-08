@@ -53,31 +53,40 @@ function renderEmptyState() {
 
 function renderCategoriesList(categories) {
   return `
-    <div class="row">
-      ${categories.map(category => `
-        <div class="col-md-4 mb-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <span class="badge" style="background-color: ${category.color || '#198754'}; font-size: 1rem; padding: 0.5rem 1rem;">
-                    <i class="fas ${category.icon || 'fa-tag'} me-2"></i>
-                    ${category.name}
-                  </span>
-                </div>
-                <div class="btn-group btn-group-sm">
-                  <button class="btn btn-outline-warning" onclick="editCategory('${category._id}', '${category.name}', '${category.color}', '${category.icon}')">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="btn btn-outline-danger" onclick="deleteCategory('${category._id}')">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th style="width: 60px;">#</th>
+                <th>Category Name</th>
+                <th style="width: 150px;" class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${categories.map((category, index) => `
+                <tr>
+                  <td class="text-muted">${index + 1}</td>
+                  <td>
+                    <span class="fw-semibold">${category.name}</span>
+                  </td>
+                  <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-warning" onclick="editCategory('${category._id}', '${category.name}')" title="Edit">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn btn-outline-danger" onclick="deleteCategory('${category._id}')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
         </div>
-      `).join('')}
+      </div>
     </div>
   `;
 }
@@ -98,26 +107,9 @@ function renderCategoryModal() {
                 <label class="form-label">Category name <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="category-name" name="name" required>
               </div>
-              <div class="mb-3">
-                <label class="form-label">Color</label>
-                <input type="color" class="form-control form-control-color" id="category-color" name="color" value="#198754">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Category icon</label>
-                <select class="form-select" id="category-icon" name="icon">
-                  <option value="fa-tag">Tag</option>
-                  <option value="fa-briefcase">Briefcase</option>
-                  <option value="fa-home">Home</option>
-                  <option value="fa-graduation-cap">Education</option>
-                  <option value="fa-heart">Heart</option>
-                  <option value="fa-star">Star</option>
-                  <option value="fa-calendar">Calendar</option>
-                  <option value="fa-folder">Folder</option>
-                </select>
-              </div>
             </form>
           </div>
-          <div class="modal-footer">
+          <div class="modal-footer align-items-center">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="button" class="btn btn-primary" onclick="saveCategory()">Save</button>
           </div>
@@ -131,19 +123,15 @@ function renderCategoryModal() {
 window.showCategoryModal = function() {
   document.getElementById('category-id').value = '';
   document.getElementById('category-name').value = '';
-  document.getElementById('category-color').value = '#198754';
-  document.getElementById('category-icon').value = 'fa-tag';
   document.getElementById('categoryModalTitle').textContent = 'Create new category';
   
   const modal = new bootstrap.Modal(document.getElementById('categoryModal'));
   modal.show();
 };
 
-window.editCategory = function(id, name, color, icon) {
+window.editCategory = function(id, name) {
   document.getElementById('category-id').value = id;
   document.getElementById('category-name').value = name;
-  document.getElementById('category-color').value = color || '#198754';
-  document.getElementById('category-icon').value = icon || 'fa-tag';
   document.getElementById('categoryModalTitle').textContent = 'Edit category';
   
   const modal = new bootstrap.Modal(document.getElementById('categoryModal'));
@@ -154,15 +142,13 @@ window.saveCategory = async function() {
   const form = document.getElementById('category-form');
   const categoryId = document.getElementById('category-id').value;
   const name = document.getElementById('category-name').value;
-  const color = document.getElementById('category-color').value;
-  const icon = document.getElementById('category-icon').value;
 
   if (!name.trim()) {
     showMessage('error', 'Please enter a category name');
     return;
   }
 
-  const data = { name, color, icon };
+  const data = { name };
 
   try {
     let response;
@@ -207,7 +193,9 @@ window.deleteCategory = async function(categoryId) {
 };
 
 function showMessage(type, message) {
-  if (window.Toastify) {
+  // eslint-disable-next-line no-undef
+  if (typeof Toastify !== 'undefined') {
+    // eslint-disable-next-line no-undef
     Toastify({
       text: message,
       duration: 3000,

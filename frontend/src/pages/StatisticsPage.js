@@ -7,10 +7,6 @@ export async function renderStatisticsPage() {
     const statsResponse = await api.get('/api/tasks/statistics');
     const stats = statsResponse.data || {};
 
-    // Fetch all tasks for charts
-    const tasksResponse = await api.get('/api/tasks');
-    const tasks = tasksResponse.data?.tasks || [];
-
     const totalTasks = stats.totalTasks || 0;
     const completedTasks = stats.completedTasks || 0;
     const inProgressTasks = stats.inProgressTasks || 0;
@@ -111,7 +107,7 @@ export async function renderStatisticsPage() {
           </div>
         </div>
 
-        <div class="row">
+        <div class="row mb-4">
           <div class="col-md-6 mb-4">
             <div class="card border-0 shadow-sm">
               <div class="card-header bg-white">
@@ -170,6 +166,7 @@ export async function renderStatisticsPage() {
             </div>
           </div>
         </div>
+
       </div>
     `;
   } catch (error) {
@@ -204,10 +201,20 @@ export async function initStatisticsPage() {
     // Prepare or cleanup chart holders
     window._tmCharts = window._tmCharts || {};
     if (window._tmCharts.statusPie) {
-      try { window._tmCharts.statusPie.destroy(); } catch (_) {}
+      try { 
+        window._tmCharts.statusPie.destroy(); 
+      } catch (err) {
+        // Chart already destroyed or not initialized
+        console.debug('Status pie chart cleanup:', err.message);
+      }
     }
     if (window._tmCharts.priorityBar) {
-      try { window._tmCharts.priorityBar.destroy(); } catch (_) {}
+      try { 
+        window._tmCharts.priorityBar.destroy(); 
+      } catch (err) {
+        // Chart already destroyed or not initialized
+        console.debug('Priority bar chart cleanup:', err.message);
+      }
     }
 
     // Build counts for priorities
@@ -220,6 +227,7 @@ export async function initStatisticsPage() {
     // Status Pie Chart
     const statusCtx = document.getElementById('statusPieChart');
     if (statusCtx && window.Chart) {
+      // eslint-disable-next-line no-undef
       window._tmCharts.statusPie = new Chart(statusCtx, {
         type: 'pie',
         data: {
@@ -231,7 +239,7 @@ export async function initStatisticsPage() {
               completedTasks,
               cancelledTasks
             ],
-            backgroundColor: ['#6c757d', '#0dcaf0', '#198754', '#dc3545']
+            backgroundColor: ['#6c757d', '#0dcaf0', '#28a745', '#dc3545']
           }]
         },
         options: {
@@ -245,6 +253,7 @@ export async function initStatisticsPage() {
     // Priority Bar Chart
     const priorityCtx = document.getElementById('priorityBarChart');
     if (priorityCtx && window.Chart) {
+      // eslint-disable-next-line no-undef
       window._tmCharts.priorityBar = new Chart(priorityCtx, {
         type: 'bar',
         data: {
@@ -252,7 +261,7 @@ export async function initStatisticsPage() {
           datasets: [{
             label: 'Tasks',
             data: [priorityCounts.Low, priorityCounts.Medium, priorityCounts.High],
-            backgroundColor: ['#198754', '#ffc107', '#dc3545']
+            backgroundColor: ['#28a745', '#ffc107', '#dc3545']
           }]
         },
         options: {
