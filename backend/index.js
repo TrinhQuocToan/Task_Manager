@@ -88,19 +88,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// Debug: Log all registered routes
-console.log('Registered routes:');
-console.log('- POST /api/auth/register');
-console.log('- POST /api/auth/login');
-console.log('- GET /api/auth/me');
-console.log('- PUT /api/auth/profile');
-console.log('- PUT /api/auth/change-password');
-console.log('- POST /api/tasks');
-console.log('- GET /api/tasks');
-console.log('- GET /api/tasks/:id');
-console.log('- PUT /api/tasks/:id');
-console.log('- DELETE /api/tasks/:id');
-
 // 404 handler for API routes
 app.use((req, res, next) => {
     if (req.path.startsWith('/api')) {
@@ -112,11 +99,18 @@ app.use((req, res, next) => {
     next();
 });
 
+// Import task reminder scheduler
+const { taskReminderJob } = require('./src/schedulers/taskReminderScheduler');
+
 // Connect to database and start server
 connectDB()
     .then(() => {
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
+            
+            // Start task reminder scheduler
+            taskReminderJob.start();
+            console.log('📅 Task reminder scheduler started');
         });
     })
     .catch((error) => {

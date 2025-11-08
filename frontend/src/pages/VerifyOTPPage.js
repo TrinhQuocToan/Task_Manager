@@ -1,5 +1,6 @@
 import { api } from '../main.js';
 import router from '../router/index.js';
+import { Toastify } from '../utils/toastify.js';
 
 export function renderVerifyOTPPage() {
   const urlParams = new URLSearchParams(window.location.search);

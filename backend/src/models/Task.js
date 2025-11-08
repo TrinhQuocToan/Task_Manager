@@ -39,6 +39,18 @@ const taskSchema = new mongoose.Schema({
     reminderAt: {
         type: Date,
         default: null
+    },
+    reminderSent: {
+        type: Boolean,
+        default: false
+    },
+    deleted: {
+        type: Boolean,
+        default: false
+    },
+    deletedAt: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true
@@ -48,6 +60,17 @@ const taskSchema = new mongoose.Schema({
 taskSchema.index({ userId: 1, status: 1 });
 taskSchema.index({ userId: 1, dueDate: 1 });
 taskSchema.index({ categoryId: 1 });
+taskSchema.index({ reminderAt: 1, reminderSent: 1 });
+taskSchema.index({ userId: 1, deleted: 1 });
+
+// Query helper để exclude deleted items by default
+taskSchema.pre(/^find/, function(next) {
+    // Chỉ filter deleted nếu không có query.deleted
+    if (this.getQuery().deleted === undefined) {
+        this.where({ deleted: false });
+    }
+    next();
+});
 
 module.exports = mongoose.model('Task', taskSchema, 'tasks');
 

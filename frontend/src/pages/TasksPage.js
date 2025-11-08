@@ -1,5 +1,5 @@
 import { api } from '../main.js';
-import { formatDate, formatDateOnly, getStatusBadgeClass, getPriorityBadgeClass, getStatusIcon } from '../utils/format.js';
+import { formatDateOnly, isTaskOverdue, getOverdueBadgeText, getCompletionDelayMessage, getCompletedLateBadgeText } from '../utils/format.js';
 
 export async function renderTasksPage() {
   try {
@@ -19,7 +19,8 @@ export async function renderTasksPage() {
     // Build API URL with filters
     const queryParams = new URLSearchParams();
     if (searchQuery) queryParams.append('search', searchQuery);
-    if (statusFilter) queryParams.append('status', statusFilter);
+    // Don't send "Overdue" to backend, we'll filter client-side
+    if (statusFilter && statusFilter !== 'Overdue') queryParams.append('status', statusFilter);
     if (priorityFilter) queryParams.append('priority', priorityFilter);
     if (categoryFilter) queryParams.append('categoryId', categoryFilter);
     queryParams.append('sortBy', sortBy);
@@ -27,7 +28,12 @@ export async function renderTasksPage() {
     
     const url = `/api/tasks?${queryParams.toString()}`;
     const response = await api.get(url);
-    const tasks = response.data?.tasks || [];
+    let tasks = response.data?.tasks || [];
+    
+    // Client-side filter for overdue tasks
+    if (statusFilter === 'Overdue') {
+      tasks = tasks.filter(task => isTaskOverdue(task));
+    }
     
     return `
       <div class="container-fluid py-4" style="margin-top: 0;">
@@ -118,6 +124,7 @@ function renderFiltersAndSort(categories, filters) {
               <option value="In Progress" ${statusFilter === 'In Progress' ? 'selected' : ''}>In Progress</option>
               <option value="Completed" ${statusFilter === 'Completed' ? 'selected' : ''}>Completed</option>
               <option value="Cancelled" ${statusFilter === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+              <option value="Overdue" ${statusFilter === 'Overdue' ? 'selected' : ''}>⚠️ Overdue</option>
             </select>
           </div>
           <div class="col-md-3">
@@ -192,10 +199,10 @@ function renderTasksList(tasks, sortBy, sortOrder) {
                       Title <i class="fas ${getSortIcon('title')}"></i>
                     </th>
                     <th>Categories</th>
-                    <th class="${getSortClass('priority')}" style="cursor: pointer;" onclick="sortByColumn('priority')">
+                    <th class="${getSortClass('priority')}" style="cursor: pointer; width: 130px; padding-right: 20px;" onclick="sortByColumn('priority')">
                       Priority <i class="fas ${getSortIcon('priority')}"></i>
                     </th>
-                    <th class="${getSortClass('status')}" style="cursor: pointer;" onclick="sortByColumn('status')">
+                    <th class="${getSortClass('status')}" style="cursor: pointer; width: 160px; padding-left: 20px;" onclick="sortByColumn('status')">
                       Status <i class="fas ${getSortIcon('status')}"></i>
                     </th>
                     <th class="${getSortClass('dueDate')}" style="cursor: pointer;" onclick="sortByColumn('dueDate')">
@@ -217,40 +224,46 @@ function renderTasksList(tasks, sortBy, sortOrder) {
 }
 
 function renderTaskRow(task) {
-  const statusClass = getStatusBadgeClass(task.status);
-  const priorityClass = getPriorityBadgeClass(task.priority);
-  const statusIcon = getStatusIcon(task.status);
+  const isOverdue = isTaskOverdue(task);
+  const overdueBadge = isOverdue ? getOverdueBadgeText(task) : '';
   
   return `
-    <tr>
+    <tr class="${isOverdue ? 'table-danger' : ''}" style="${isOverdue ? 'background-color: #ffe6e6;' : ''}">
       <td>
         <div>
           <strong>${task.title || 'Không có tiêu đề'}</strong>
+          ${isOverdue ? `<span class="badge bg-danger ms-2"><i class="fas fa-exclamation-triangle me-1"></i>${overdueBadge}</span>` : ''}
           ${task.description ? `<br><small class="text-muted">${task.description}</small>` : ''}
         </div>
       </td>
       <td>
         ${task.categoryId ? `
-          <span class="badge" style="background-color: ${task.categoryId.color || '#198754'};">
+          <span class="badge" style="background-color: ${task.categoryId.color || '#d86b22'};">
             <i class="fas ${task.categoryId.icon || 'fa-tag'} me-1"></i>
             ${task.categoryId.name || 'N/A'}
           </span>
         ` : '<span class="text-muted">N/A</span>'}
       </td>
-      <td>
-        <select class="form-select form-select-sm select-priority ${getPrioritySelectClass(task.priority)}" onchange="updateTaskField('${task._id}','priority', this.value, this)">
+      <td style="padding-right: 20px;">
+        <select class="form-select form-select-sm select-priority ${getPrioritySelectClass(task.priority)}" 
+                onchange="updateTaskField('${task._id}','priority', this.value, this, '${task.dueDate || ''}')">
           <option value="Low" ${task.priority === 'Low' ? 'selected' : ''}>Low</option>
           <option value="Medium" ${task.priority === 'Medium' ? 'selected' : ''}>Medium</option>
           <option value="High" ${task.priority === 'High' ? 'selected' : ''}>High</option>
         </select>
       </td>
-      <td>
-        <select class="form-select form-select-sm select-status ${getStatusSelectClass(task.status)}" onchange="updateTaskField('${task._id}','status', this.value, this)">
+      <td style="padding-left: 20px;">
+        <select class="form-select form-select-sm select-status ${getStatusSelectClass(task.status)}" 
+                onchange="updateTaskField('${task._id}','status', this.value, this, '${task.dueDate || ''}')">
           <option value="Not Started" ${task.status === 'Not Started' ? 'selected' : ''}>Not Started</option>
           <option value="In Progress" ${task.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
           <option value="Completed" ${task.status === 'Completed' ? 'selected' : ''}>Completed</option>
           <option value="Cancelled" ${task.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
         </select>
+        ${(() => {
+          const lateBadge = getCompletedLateBadgeText(task);
+          return lateBadge ? `<div class="mt-2"><small class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>${lateBadge}</small></div>` : '';
+        })()}
       </td>
       <td>
         ${task.dueDate ? formatDateOnly(task.dueDate) : 'N/A'}
@@ -314,7 +327,9 @@ function getPrioritySelectClass(priority) {
 }
 
 function showMessage(type, message) {
-  if (window.Toastify) {
+  // eslint-disable-next-line no-undef
+  if (typeof Toastify !== 'undefined') {
+    // eslint-disable-next-line no-undef
     Toastify({
       text: message,
       duration: 3000,
@@ -364,18 +379,33 @@ window.resetFilters = function() {
 };
 
 // Inline update for single field (status/priority)
-window.updateTaskField = async function(taskId, field, value, el) {
+window.updateTaskField = async function(taskId, field, value, el, dueDate) {
   try {
     const payload = { [field]: value };
     const response = await api.put(`/api/tasks/${taskId}`, payload);
     if (response.success) {
-      showMessage('success', 'Update successful');
-      // Update color class
-      if (el) {
-        if (field === 'status') {
-          el.className = `form-select form-select-sm select-status ${getStatusSelectClass(value)}`;
-        } else if (field === 'priority') {
-          el.className = `form-select form-select-sm select-priority ${getPrioritySelectClass(value)}`;
+      // Special message for completed tasks
+      let message = 'Update successful';
+      if (field === 'status' && value === 'Completed' && dueDate) {
+        const delayMessage = getCompletionDelayMessage(dueDate);
+        message = delayMessage;
+      }
+      
+      showMessage('success', message);
+      
+      // Reload page to show updated badge for completed late tasks
+      if (field === 'status' && value === 'Completed') {
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        // Update color class
+        if (el) {
+          if (field === 'status') {
+            el.className = `form-select form-select-sm select-status ${getStatusSelectClass(value)}`;
+          } else if (field === 'priority') {
+            el.className = `form-select form-select-sm select-priority ${getPrioritySelectClass(value)}`;
+          }
         }
       }
     } else {

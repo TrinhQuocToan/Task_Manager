@@ -39,9 +39,6 @@ export function renderHeader(user = null) {
       
       <div class="header-right d-flex align-items-center">
         ${user ? `
-          <a href="/tasks/create" class="btn btn-light btn-new-task me-3" data-link="/tasks/create">
-            <i class="fas fa-plus me-2"></i><span>New Task</span>
-          </a>
           
           <div class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">

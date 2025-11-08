@@ -6,6 +6,7 @@ const {
     createTask,
     updateTask,
     deleteTask,
+    restoreTask,
     getTaskStatistics
 } = require('../controllers/taskController');
 
@@ -26,6 +27,9 @@ router.route('/:id')
     .get(getTask)
     .put(updateTask)
     .delete(deleteTask);
+
+// Restore deleted task
+router.put('/:id/restore', restoreTask);
 
 module.exports = router;
 

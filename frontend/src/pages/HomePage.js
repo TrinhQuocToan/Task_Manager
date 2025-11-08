@@ -1,5 +1,5 @@
 import { api, getCurrentUser } from '../main.js';
-import { formatCurrency, formatDate, calculatePercentage } from '../utils/format.js';
+import { formatCurrency, formatDate, calculatePercentage, isTaskOverdue } from '../utils/format.js';
 import { renderScheduleCalendar } from '../components/ScheduleCalendar.js';
 
 export async function renderHomePage() {
@@ -87,6 +87,9 @@ async function renderHomeUser(user) {
 
     const stats = statsResponse.data || {};
     const allTasks = allTasksResponse.data?.tasks || [];
+    
+    // Calculate overdue tasks count
+    const overdueTasks = allTasks.filter(task => isTaskOverdue(task)).length;
 
     return `
       <div class="homepage">
@@ -144,8 +147,19 @@ async function renderHomeUser(user) {
                         <span class="fw-bold text-info">${stats.inProgressTasks || 0}</span>
                       </div>
                     </div>
+                    ${overdueTasks > 0 ? `
+                      <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <span><i class="fas fa-exclamation-triangle text-danger me-2"></i>Overdue</span>
+                          <span class="fw-bold text-danger">${overdueTasks}</span>
+                        </div>
+                      </div>
+                    ` : ''}
                     <div class="text-center mt-3">
                       <a href="/tasks" class="btn btn-sm btn-outline-primary" data-link="/tasks">View all</a>
+                      ${overdueTasks > 0 ? `
+                        <a href="/tasks?status=Overdue" class="btn btn-sm btn-danger ms-1" data-link="/tasks?status=Overdue">View overdue</a>
+                      ` : ''}
                     </div>
                   </div>
                 </div>

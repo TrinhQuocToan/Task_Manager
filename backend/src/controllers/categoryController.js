@@ -196,12 +196,12 @@ exports.updateCategory = async (req, res) => {
     }
 };
 
-// @desc    Delete category
+// @desc    Delete category (soft delete)
 // @route   DELETE /api/categories/:id
 // @access  Private
 exports.deleteCategory = async (req, res) => {
     try {
-        const category = await Category.findOneAndDelete({
+        const category = await Category.findOne({
             _id: req.params.id,
             userId: req.userId
         });
@@ -212,6 +212,11 @@ exports.deleteCategory = async (req, res) => {
                 message: 'Category not found'
             });
         }
+
+        // Soft delete: mark as deleted
+        category.deleted = true;
+        category.deletedAt = new Date();
+        await category.save();
 
         res.json({
             success: true,
@@ -231,6 +236,313 @@ exports.deleteCategory = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Server error during category deletion'
+        });
+    }
+};
+
+// @desc    Restore deleted category
+// @route   PUT /api/categories/:id/restore
+// @access  Private
+exports.restoreCategory = async (req, res) => {
+    try {
+        // Explicitly allow finding deleted categories
+        const category = await Category.findOne({
+            _id: req.params.id,
+            userId: req.userId,
+            deleted: true
+        });
+
+        if (!category) {
+            return res.status(404).json({
+                success: false,
+                message: 'Deleted category not found'
+            });
+        }
+
+        // Restore category
+        category.deleted = false;
+        category.deletedAt = null;
+        await category.save();
+
+        res.json({
+            success: true,
+            message: 'Category restored successfully',
+            data: { category }
+        });
+    } catch (error) {
+        console.error('Restore category error:', error);
+        
+        if (error.kind === 'ObjectId') {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid category ID'
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Server error during category restoration'
+        });
+    }
+};
+
+// @desc    Get statistics for a specific category with optional date range
+// @route   GET /api/categories/:id/statistics?startDate=xxx&endDate=xxx
+// @access  Private
+exports.getCategoryStatistics = async (req, res) => {
+    const Task = require('../models/Task');
+    
+    try {
+        const { startDate, endDate } = req.query;
+        const categoryId = req.params.id;
+        const userId = req.userId;
+
+        // Verify category exists and belongs to user
+        const category = await Category.findOne({
+            _id: categoryId,
+            userId: userId
+        });
+
+        if (!category) {
+            return res.status(404).json({
+                success: false,
+                message: 'Category not found'
+            });
+        }
+
+        // Build match query
+        const matchQuery = {
+            userId: typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId,
+            categoryId: new mongoose.Types.ObjectId(categoryId)
+        };
+
+        // Add date range filter if provided
+        if (startDate || endDate) {
+            matchQuery.createdAt = {};
+            if (startDate) {
+                matchQuery.createdAt.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                const endDateTime = new Date(endDate);
+                endDateTime.setHours(23, 59, 59, 999); // Include entire end date
+                matchQuery.createdAt.$lte = endDateTime;
+            }
+        }
+
+        // Get statistics using aggregation
+        const stats = await Task.aggregate([
+            { $match: matchQuery },
+            {
+                $group: {
+                    _id: null,
+                    totalTasks: { $sum: 1 },
+                    completedTasks: {
+                        $sum: { $cond: [{ $eq: ['$status', 'Completed'] }, 1, 0] }
+                    },
+                    inProgressTasks: {
+                        $sum: { $cond: [{ $eq: ['$status', 'In Progress'] }, 1, 0] }
+                    },
+                    notStartedTasks: {
+                        $sum: { $cond: [{ $eq: ['$status', 'Not Started'] }, 1, 0] }
+                    },
+                    cancelledTasks: {
+                        $sum: { $cond: [{ $eq: ['$status', 'Cancelled'] }, 1, 0] }
+                    },
+                    highPriorityTasks: {
+                        $sum: { $cond: [{ $eq: ['$priority', 'High'] }, 1, 0] }
+                    },
+                    mediumPriorityTasks: {
+                        $sum: { $cond: [{ $eq: ['$priority', 'Medium'] }, 1, 0] }
+                    },
+                    lowPriorityTasks: {
+                        $sum: { $cond: [{ $eq: ['$priority', 'Low'] }, 1, 0] }
+                    },
+                    overdueTasks: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $and: [
+                                        { $lt: ['$dueDate', new Date()] },
+                                        { $ne: ['$status', 'Completed'] },
+                                        { $ne: ['$status', 'Cancelled'] },
+                                        { $ne: ['$deleted', true] }
+                                    ]
+                                },
+                                1,
+                                0
+                            ]
+                        }
+                    },
+                    deletedTasks: {
+                        $sum: { $cond: [{ $eq: ['$deleted', true] }, 1, 0] }
+                    }
+                }
+            }
+        ]);
+
+        const result = stats[0] || {
+            totalTasks: 0,
+            completedTasks: 0,
+            inProgressTasks: 0,
+            notStartedTasks: 0,
+            cancelledTasks: 0,
+            highPriorityTasks: 0,
+            mediumPriorityTasks: 0,
+            lowPriorityTasks: 0,
+            overdueTasks: 0,
+            deletedTasks: 0
+        };
+
+        // Calculate completion rate
+        result.completionRate = result.totalTasks > 0 
+            ? Math.round((result.completedTasks / result.totalTasks) * 100) 
+            : 0;
+
+        res.json({
+            success: true,
+            data: {
+                category: {
+                    id: category._id,
+                    name: category.name,
+                    color: category.color,
+                    icon: category.icon
+                },
+                dateRange: {
+                    startDate: startDate || null,
+                    endDate: endDate || null
+                },
+                statistics: result
+            }
+        });
+    } catch (error) {
+        console.error('Get category statistics error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
+
+// @desc    Get comparative statistics across all categories
+// @route   GET /api/categories/statistics/compare?startDate=xxx&endDate=xxx
+// @access  Private
+exports.compareCategories = async (req, res) => {
+    const Task = require('../models/Task');
+    
+    try {
+        const { startDate, endDate } = req.query;
+        const userId = req.userId;
+        const userIdObject = typeof userId === 'string' 
+            ? new mongoose.Types.ObjectId(userId) 
+            : userId;
+
+        // Build match query for tasks
+        const matchQuery = { userId: userIdObject };
+
+        // Add date range filter if provided
+        if (startDate || endDate) {
+            matchQuery.createdAt = {};
+            if (startDate) {
+                matchQuery.createdAt.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                const endDateTime = new Date(endDate);
+                endDateTime.setHours(23, 59, 59, 999);
+                matchQuery.createdAt.$lte = endDateTime;
+            }
+        }
+
+        // Get statistics grouped by category
+        const categoryStats = await Task.aggregate([
+            { $match: matchQuery },
+            {
+                $group: {
+                    _id: '$categoryId',
+                    totalTasks: { $sum: 1 },
+                    completedTasks: {
+                        $sum: { $cond: [{ $eq: ['$status', 'Completed'] }, 1, 0] }
+                    },
+                    inProgressTasks: {
+                        $sum: { $cond: [{ $eq: ['$status', 'In Progress'] }, 1, 0] }
+                    },
+                    notStartedTasks: {
+                        $sum: { $cond: [{ $eq: ['$status', 'Not Started'] }, 1, 0] }
+                    },
+                    cancelledTasks: {
+                        $sum: { $cond: [{ $eq: ['$status', 'Cancelled'] }, 1, 0] }
+                    },
+                    highPriorityTasks: {
+                        $sum: { $cond: [{ $eq: ['$priority', 'High'] }, 1, 0] }
+                    },
+                    overdueTasks: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $and: [
+                                        { $lt: ['$dueDate', new Date()] },
+                                        { $ne: ['$status', 'Completed'] },
+                                        { $ne: ['$status', 'Cancelled'] },
+                                        { $ne: ['$deleted', true] }
+                                    ]
+                                },
+                                1,
+                                0
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'category'
+                }
+            },
+            { $unwind: '$category' },
+            {
+                $project: {
+                    _id: 0,
+                    categoryId: '$_id',
+                    categoryName: '$category.name',
+                    categoryColor: '$category.color',
+                    categoryIcon: '$category.icon',
+                    totalTasks: 1,
+                    completedTasks: 1,
+                    inProgressTasks: 1,
+                    notStartedTasks: 1,
+                    cancelledTasks: 1,
+                    highPriorityTasks: 1,
+                    overdueTasks: 1,
+                    completionRate: {
+                        $cond: [
+                            { $eq: ['$totalTasks', 0] },
+                            0,
+                            { $round: [{ $multiply: [{ $divide: ['$completedTasks', '$totalTasks'] }, 100] }, 0] }
+                        ]
+                    }
+                }
+            },
+            { $sort: { totalTasks: -1 } }
+        ]);
+
+        res.json({
+            success: true,
+            data: {
+                dateRange: {
+                    startDate: startDate || null,
+                    endDate: endDate || null
+                },
+                categories: categoryStats,
+                totalCategories: categoryStats.length
+            }
+        });
+    } catch (error) {
+        console.error('Compare categories error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
         });
     }
 };

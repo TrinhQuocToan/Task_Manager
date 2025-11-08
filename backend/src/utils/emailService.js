@@ -206,3 +206,199 @@ exports.sendPasswordChangedEmail = async (email, username) => {
         return { success: false, error: error.message };
     }
 };
+
+// Gửi email nhắc nhở task
+exports.sendTaskReminderEmail = async (email, username, task) => {
+    try {
+        const transporter = createTransporter();
+
+        const dueDate = new Date(task.dueDate).toLocaleString('vi-VN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        const priorityColor = {
+            'Low': '#6B7280',
+            'Medium': '#F59E0B',
+            'High': '#EF4444'
+        };
+
+        const priorityIcon = {
+            'Low': '🔵',
+            'Medium': '🟡',
+            'High': '🔴'
+        };
+
+        const mailOptions = {
+            from: `"Task Manager" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: `⏰ Nhắc nhở: ${task.title}`,
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                        }
+                        .container {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            padding: 20px;
+                        }
+                        .header {
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            padding: 30px 20px;
+                            text-align: center;
+                            border-radius: 10px 10px 0 0;
+                        }
+                        .content {
+                            background-color: #ffffff;
+                            padding: 30px;
+                            border: 1px solid #e5e7eb;
+                            border-top: none;
+                        }
+                        .task-card {
+                            background-color: #f9fafb;
+                            border-left: 4px solid ${priorityColor[task.priority]};
+                            padding: 20px;
+                            margin: 20px 0;
+                            border-radius: 5px;
+                        }
+                        .task-title {
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: #1f2937;
+                            margin-bottom: 15px;
+                        }
+                        .task-detail {
+                            display: flex;
+                            align-items: center;
+                            margin: 10px 0;
+                            font-size: 14px;
+                        }
+                        .task-detail-icon {
+                            margin-right: 10px;
+                            min-width: 20px;
+                        }
+                        .priority-badge {
+                            display: inline-block;
+                            padding: 5px 15px;
+                            border-radius: 20px;
+                            font-size: 12px;
+                            font-weight: bold;
+                            background-color: ${priorityColor[task.priority]};
+                            color: white;
+                        }
+                        .button {
+                            display: inline-block;
+                            padding: 12px 30px;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            margin: 20px 0;
+                            font-weight: bold;
+                        }
+                        .footer {
+                            text-align: center;
+                            margin-top: 30px;
+                            padding-top: 20px;
+                            border-top: 1px solid #e5e7eb;
+                            color: #6b7280;
+                            font-size: 12px;
+                        }
+                        .warning-box {
+                            background-color: #FEF3C7;
+                            border-left: 4px solid #F59E0B;
+                            padding: 15px;
+                            margin: 20px 0;
+                            border-radius: 5px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>⏰ Nhắc Nhở Task</h1>
+                            <p style="margin: 10px 0 0; opacity: 0.9;">Bạn có một task cần chú ý!</p>
+                        </div>
+                        <div class="content">
+                            <p>Xin chào <strong>${username}</strong>,</p>
+                            
+                            <p>Đây là email nhắc nhở về task của bạn:</p>
+                            
+                            <div class="task-card">
+                                <div class="task-title">📋 ${task.title}</div>
+                                
+                                ${task.description ? `
+                                <div class="task-detail">
+                                    <span class="task-detail-icon">📝</span>
+                                    <span>${task.description}</span>
+                                </div>
+                                ` : ''}
+                                
+                                <div class="task-detail">
+                                    <span class="task-detail-icon">📅</span>
+                                    <span><strong>Deadline:</strong> ${dueDate}</span>
+                                </div>
+                                
+                                <div class="task-detail">
+                                    <span class="task-detail-icon">⚡</span>
+                                    <span><strong>Độ ưu tiên:</strong> <span class="priority-badge">${priorityIcon[task.priority]} ${task.priority}</span></span>
+                                </div>
+                                
+                                <div class="task-detail">
+                                    <span class="task-detail-icon">📊</span>
+                                    <span><strong>Trạng thái:</strong> ${task.status}</span>
+                                </div>
+                                
+                                ${task.categoryId ? `
+                                <div class="task-detail">
+                                    <span class="task-detail-icon">🏷️</span>
+                                    <span><strong>Danh mục:</strong> ${task.categoryId.name}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                            
+                            ${task.status !== 'Completed' ? `
+                            <div class="warning-box">
+                                <strong>⚠️ Lưu ý:</strong> Task này chưa hoàn thành. Hãy kiểm tra và cập nhật trạng thái!
+                            </div>
+                            ` : ''}
+                            
+                            <center>
+                                <a href="${process.env.FRONTEND_URL}/tasks/${task._id}" class="button">
+                                    Xem Chi Tiết Task
+                                </a>
+                            </center>
+                            
+                            <p>Chúc bạn làm việc hiệu quả! 💪</p>
+                            
+                            <p>Trân trọng,<br>Đội ngũ Task Manager</p>
+                        </div>
+                        <div class="footer">
+                            <p>Đây là email tự động từ hệ thống nhắc nhở.</p>
+                            <p>&copy; 2025 Task Manager. Bảo lưu mọi quyền.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('✅ Task reminder email sent:', info.messageId);
+        return { success: true, messageId: info.messageId };
+
+    } catch (error) {
+        console.error('❌ Task reminder email send error:', error);
+        return { success: false, error: error.message };
+    }
+};
